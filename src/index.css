@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&family=Comme:wght@100..900&family=Funnel+Display:wght@300..800&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Varela+Round&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+  font-family: "Funnel Display", sans-serif;
+  font-weight: 300;
+}
+:root {
+  --fontsize: 1rem;
+}
+
+.dark {
+  --background: #151515;
+  --text: #ffffff;
+  --mid: #373737;
+  --accent1: #FFDFB9;
+  --accent2: #A4193D;
+  --shadow: rgba(255, 255, 255, 0.346);
+}
+.tema-repaint * {
+  -webkit-text-fill-color: unset;
+  -webkit-background-clip: unset;
+}

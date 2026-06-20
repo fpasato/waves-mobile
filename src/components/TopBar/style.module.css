@@ -1,0 +1,94 @@
+.topBar {
+    background: linear-gradient(to right, #0c0c0c9c, #4141422f);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    height: auto;
+    padding: 10px 12px;
+    border-radius: 24px;
+    /* remova margin-top e margin-bottom daqui */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    gap: 4px;
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+/* Cada botão da navegação (ícone + texto) */
+.navButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    min-width: 48px;
+    padding: 6px 4px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.1s ease;
+
+    /* Reset de estilos herdados */
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.navButton svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.1s ease;
+}
+
+/* Label pequeno abaixo do ícone */
+/* Label pequeno abaixo do ícone */
+.navLabel {
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+
+    /* Gradiente de texto */
+    background: var(--text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    /* fallback */
+
+    transition: opacity 0.1s ease;
+    /* melhor que tentar color */
+}
+
+/* Clique tátil – deixa o texto um pouco mais opaco (ou você pode usar um filtro) */
+.navButton:active .navLabel {
+    opacity: 0.8;
+}
+
+/* Clique tátil (mobile) */
+.navButton:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.navButton:active svg {
+    transform: scale(0.88);
+}
+
+.navButton:active .navLabel {
+    color: linear-gradient(to right, var(--accent1), var(--accent2));
+
+}
+
+/* Foco visível apenas para teclado */
+.navButton:focus-visible {
+    box-shadow: 0 0 0 2px var(--accent1, #FFDFB9);
+}

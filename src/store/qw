@@ -1,0 +1,629 @@
+import { create } from "zustand";
+import {
+  refreshLibraryFromDisk,
+  reloadLibraryFromDb,
+} from "../lib/syncLibrary";
+import { api } from "../database/database";
+
+// ─── Helpers ───────────────────────────────────────────
+function logWithTime(...args) {
+  const now = new Date();
+  const timestamp = `${now.getHours().toString().padStart(2, "0")}:${now
+    .getMinutes()
+    .toString()
+    .padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}.${now
+    .getMilliseconds()
+    .toString()
+    .padStart(3, "0")}`;
+  console.log(`[${timestamp}]`, ...args);
+}
+
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function createShuffleQueue(queue, currentIndex) {
+  const allIndices = queue.map((_, i) => i);
+  const remaining = allIndices.filter((i) => i !== currentIndex);
+  const shuffled = shuffleArray(remaining);
+  return [currentIndex, ...shuffled];
+}
+
+function regenerateShuffleQueue(queue, excludeIndex) {
+  const indices = queue.map((_, i) => i);
+  let shuffled = shuffleArray(indices);
+  if (shuffled.length > 1 && shuffled[0] === excludeIndex) {
+    const swapWith = 1 + Math.floor(Math.random() * (shuffled.length - 1));
+    [shuffled[0], shuffled[swapWith]] = [shuffled[swapWith], shuffled[0]];
+  }
+  return shuffled;
+}
+
+
+export const usePlayerStore = create((set, get) => ({
+  // ─── Estado principal de reprodução ──────────────────
+  currentSong: null,
+  isPlaying: false,
+  volume: 1,
+  progress: 0,
+  currentTime: 0,
+  duration: 0,
+
+  // ─── Fila e controle de ordem ────────────────────────
+  library: [],
+  queue: [],
+  queueIndex: 0,
+  shuffle: false,
+  repeat: false,
+  shuffleQueue: [],
+  shufflePos: 0,
+  restartSignal: 0,
+
+  // ─── Rádio ───────────────────────────────────────────
+  currentRadio: null,
+  playerType: "music",
+  radioPlaying: false,
+  radioBuffering: false,
+  _radioAudio: null,
+
+  // ─── Crossfade ───────────────────────────────────────
+  fadeEnabled: false,
+  fadeDuration: 3,
+
+  // ─── Letras ──────────────────────────────────────────
+  lyricsEnabled: false,
+  lyricsLines: [],
+  lyricsStatus: "idle",
+  lyricsOffset: parseFloat(localStorage.getItem("lyrics-offset")) || 0,
+  lyricsSource: "lrclib",
+  seekSignal: 0,
+  seekTarget: 0,
+
+  toasts: [],
+
+  toast: ({ message, type = "info", duration = 4000 }) => {
+    const id = Math.random().toString(36).slice(2);
+    set((s) => ({ toasts: [...s.toasts, { id, message, type, duration }] }));
+  },
+
+  dismissToast: (id) => {
+    set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
+  },
+
+  // ────────── Preferências ──────────
+  setParticlesEnabled: (value) => {
+    localStorage.setItem("particles-enabled", value);
+    set({ particlesEnabled: value });
+  },
+
+  setFadeEnabled: (fadeEnabled) => {
+    logWithTime(`⚙️ setFadeEnabled: ${fadeEnabled}`);
+    set({ fadeEnabled });
+  },
+
+  setFadeDuration: (value) => {
+    const newVal = Math.min(15, Math.max(1, Number(value) || 3));
+    logWithTime(`⚙️ setFadeDuration: ${value} -> ${newVal}`);
+    set({ fadeDuration: newVal });
+  },
+
+  loadPlaybackSettings: async () => {
+    logWithTime(`⚙️ loadPlaybackSettings iniciado`);
+    try {
+      const en = await api.settings.get("fadeEnabled");
+      const du = await api.settings.get("fadeDuration");
+      const parsed = parseFloat(du ?? "3", 10);
+      const newFadeEnabled = en === "true";
+      const newFadeDuration = Math.min(
+        15,
+        Math.max(1, Number.isFinite(parsed) ? parsed : 3),
+      );
+      logWithTime(
+        `⚙️ loadPlaybackSettings: fadeEnabled=${newFadeEnabled}, fadeDuration=${newFadeDuration}`,
+      );
+      set({
+        fadeEnabled: newFadeEnabled,
+        fadeDuration: newFadeDuration,
+      });
+    } catch (e) {
+      logWithTime(`⚙️ loadPlaybackSettings erro:`, e);
+    }
+  },
+
+  // ────────── Biblioteca ──────────
+  setLibrary: (library) => {
+    logWithTime(`📚 setLibrary: ${library.length} músicas`);
+    set({ library });
+  },
+  syncLibraryWithDatabase: async () => {
+    logWithTime(`🔄 syncLibraryWithDatabase iniciado`);
+    const songs = await refreshLibraryFromDisk();
+    logWithTime(`🔄 syncLibraryWithDatabase finalizado: ${songs.length} músicas`);
+    set({ library: songs });
+    return songs;
+  },
+  reloadLibraryFromDatabase: async () => {
+    logWithTime(`🔄 reloadLibraryFromDatabase iniciado`);
+    const songs = await reloadLibraryFromDb();
+    logWithTime(`🔄 reloadLibraryFromDatabase finalizado: ${songs.length} músicas`);
+    set({ library: songs });
+    return songs;
+  },
+
+  // ────────── Letras ──────────
+  toggleLyrics: () => set((s) => ({ lyricsEnabled: !s.lyricsEnabled })),
+  setLyricsEnabled: (value) => set({ lyricsEnabled: value }),
+  setLyricsSource: (source) => set({ lyricsSource: source }),
+  setLyricsOffset: (offset) => {
+    localStorage.setItem("lyrics-offset", offset);
+    set({ lyricsOffset: offset });
+  },
+  setLyricsLines: (lines) => set({ lyricsLines: lines }),
+  setLyricsStatus: (status) => set({ lyricsStatus: status }),
+  clearLyrics: () => set({ lyricsLines: [], lyricsStatus: "idle" }),
+
+  // ────────── Controle de reprodução (básico) ──────────
+  setVolume: (value) => {
+    logWithTime(`🔊 setVolume: ${value}`);
+    const state = get();
+    set({ volume: value });
+    if (state._radioAudio) {
+      state._radioAudio.volume = value;
+    }
+  },
+  setProgress: (value) => set({ progress: value }),
+  setCurrentTime: (value) => set({ currentTime: value }),
+  setDuration: (value) => {
+    logWithTime(`⏱️ setDuration: ${value}s`);
+    set({ duration: value });
+  },
+  setPlaying: (value) => {
+    logWithTime(`🔊 setPlaying: ${value}`);
+    set({ isPlaying: value });
+  },
+  stop: () => {
+    logWithTime(`⏹️ stop chamado`);
+    set({
+      currentSong: null,
+      isPlaying: false,
+      progress: 0,
+      currentTime: 0,
+      duration: 0,
+    });
+  },
+  togglePlay: () => {
+    logWithTime(`⏯️ togglePlay`);
+    const { currentSong, queue, queueIndex, isPlaying } = get();
+    if (!currentSong && queue.length > 0) {
+      logWithTime(`⏯️ togglePlay: sem currentSong, iniciando primeira música da fila`);
+      return set({ currentSong: queue[queueIndex], isPlaying: true });
+    }
+    logWithTime(`⏯️ togglePlay: isPlaying passará de ${isPlaying} para ${!isPlaying}`);
+    set({ isPlaying: !isPlaying });
+  },
+  seekForward: (seconds = 10) => {
+    const { currentTime, duration } = get();
+    if (!duration || isNaN(duration)) return;
+    const newTime = currentTime + seconds;
+    if (newTime >= duration - 1) {
+      const now = Date.now();
+      const last = get()._lastNextSong ?? 0;
+      if (now - last < 800) return;
+      set({ _lastNextSong: now });
+      get().nextSong();
+    } else {
+      set({ seekTarget: newTime, seekSignal: get().seekSignal + 1 });
+    }
+  },
+  seekBackward: (seconds = 10) => {
+    const { currentTime } = get();
+    const newTime = Math.max(0, currentTime - seconds);
+    set({ seekTarget: newTime, seekSignal: get().seekSignal + 1 });
+  },
+
+  // ────────── Gerenciamento da fila ──────────
+  setQueue: (queue) => {
+    logWithTime(`📃 setQueue: ${queue?.length || 0} músicas | resetando shuffle`);
+    set({
+      queue: queue ?? [],
+      queueIndex: 0,
+      currentSong: queue?.[0] ?? null,
+      isPlaying: true,
+      shuffle: false,
+      shuffleQueue: [],
+      shufflePos: 0,
+    });
+  },
+
+  clearQueue: () => {
+    logWithTime(`🗑️ clearQueue chamado`);
+    set({
+      queue: [],
+      queueIndex: 0,
+      currentSong: null,
+      isPlaying: false,
+      progress: 0,
+      currentTime: 0,
+      duration: 0,
+      shuffle: false,
+      shuffleQueue: [],
+      shufflePos: 0,
+    });
+  },
+
+  addToQueue: (song) => {
+    logWithTime(`➕ addToQueue: ${song.title}`);
+    const { queue, shuffle, shuffleQueue, shufflePos } = get();
+    const newQueue = [...queue, song];
+    const newIndex = newQueue.length - 1;
+
+    if (shuffle) {
+      const insertPos =
+        shufflePos +
+        1 +
+        Math.floor(Math.random() * (shuffleQueue.length - shufflePos));
+      const newShuffle = [...shuffleQueue];
+      newShuffle.splice(insertPos, 0, newIndex);
+      logWithTime(`➕ addToQueue (shuffle): insertPos=${insertPos}, nova shuffleQueue length=${newShuffle.length}`);
+      set({ queue: newQueue, shuffleQueue: newShuffle });
+    } else {
+      logWithTime(`➕ addToQueue (normal): nova fila length=${newQueue.length}`);
+      set({ queue: newQueue });
+    }
+  },
+
+  removeFromQueue: (index) =>
+    set((state) => {
+      logWithTime(`➖ removeFromQueue: removendo índice ${index} (${state.queue[index]?.title})`);
+      if (index < 0 || index >= state.queue.length) return state;
+      const queue = state.queue.filter((_, i) => i !== index);
+      let queueIndex = state.queueIndex;
+      if (index < state.queueIndex) queueIndex -= 1;
+      else if (index === state.queueIndex)
+        queueIndex = Math.min(queueIndex, queue.length - 1);
+      queueIndex = Math.max(0, queueIndex);
+
+      if (queue.length === 0) {
+        logWithTime(`➖ removeFromQueue: fila ficou vazia, resetando tudo`);
+        return {
+          queue: [],
+          queueIndex: 0,
+          currentSong: null,
+          isPlaying: false,
+          progress: 0,
+          currentTime: 0,
+          duration: 0,
+          shuffle: false,
+          shuffleQueue: [],
+          shufflePos: 0,
+        };
+      }
+
+      let shuffleQueue = state.shuffleQueue;
+      let shufflePos = state.shufflePos;
+      if (state.shuffle && shuffleQueue.length) {
+        const removedPos = shuffleQueue.indexOf(index);
+        logWithTime(`➖ removeFromQueue (shuffle): removedPos=${removedPos}, shufflePos atual=${shufflePos}`);
+        shuffleQueue = shuffleQueue
+          .filter((i) => i !== index)
+          .map((i) => (i > index ? i - 1 : i));
+        if (removedPos !== -1) {
+          if (removedPos < state.shufflePos) {
+            shufflePos = state.shufflePos - 1;
+          } else if (removedPos === state.shufflePos) {
+            if (shuffleQueue.length > 0) {
+              shufflePos = Math.min(shufflePos, shuffleQueue.length - 1);
+              queueIndex = shuffleQueue[shufflePos];
+            } else {
+              shufflePos = 0;
+            }
+          }
+        }
+        if (!shuffleQueue.includes(queueIndex) && shuffleQueue.length > 0) {
+          shuffleQueue = [queueIndex, ...shuffleQueue];
+          shufflePos = 0;
+        }
+      }
+
+      const currentSong = queue[queueIndex] ?? queue[0];
+      return { queue, queueIndex, currentSong, shuffleQueue, shufflePos };
+    }),
+
+  // ────────── Navegação na fila ──────────
+  playSong: (song, queueArg) => {
+    logWithTime(`▶️ playSong: ${song.title} | queueArg fornecido? ${!!queueArg}`);
+    const state = get();
+    const finalQueue = queueArg?.length ? queueArg : [song];
+    const queueIndex = Math.max(
+      0,
+      finalQueue.findIndex((s) => s.id === song.id),
+    );
+
+    let shuffleQueue = [];
+    let shufflePos = 0;
+    if (state.shuffle) {
+      shuffleQueue = createShuffleQueue(finalQueue, queueIndex);
+    }
+
+    set({
+      queue: finalQueue,
+      queueIndex,
+      currentSong: finalQueue[queueIndex],
+      isPlaying: true,
+      shuffleQueue,
+      shufflePos,
+    });
+    api.db.recents.add(song.id).catch(() => {});
+  },
+
+  setSong: (song) => {
+    logWithTime(`🎵 setSong: ${song.title}`);
+    const { queue, shuffle, shuffleQueue, playSong } = get();
+    const index = queue.findIndex((s) => s.id === song.id);
+
+    if (index < 0) {
+      logWithTime(`🎵 setSong: música não está na fila, chamando playSong`);
+      playSong(song, [...queue, song]);
+      return;
+    }
+
+    if (shuffle && shuffleQueue.length) {
+      const pos = shuffleQueue.indexOf(index);
+      if (pos !== -1) {
+        logWithTime(`🎵 setSong: shuffle ativo, shufflePos=${pos}`);
+        set({ currentSong: song, isPlaying: true, queueIndex: index, shufflePos: pos });
+        api.db.recents.add(song.id).catch(() => {});
+        return;
+      }
+      logWithTime(`🎵 setSong: índice não está na shuffleQueue, recriando`);
+      set({
+        currentSong: song,
+        isPlaying: true,
+        queueIndex: index,
+        shuffleQueue: createShuffleQueue(queue, index),
+        shufflePos: 0,
+      });
+      api.db.recents.add(song.id).catch(() => {});
+      return;
+    }
+
+    logWithTime(`🎵 setSong final: queueIndex=${index}`);
+    set({ currentSong: song, isPlaying: true, queueIndex: index, shufflePos: 0 });
+    api.db.recents.add(song.id).catch(() => {});
+  },
+
+  peekNextSong: () => {
+    const { queue, queueIndex, shuffle, repeat, shuffleQueue, shufflePos } = get();
+    if (queue.length === 0) return null;
+
+    if (shuffle) {
+      const nextPos = shufflePos + 1;
+      if (nextPos >= shuffleQueue.length) {
+        if (repeat) return queue[shuffleQueue[0]] ?? null;
+        return null;
+      }
+      return queue[shuffleQueue[nextPos]] ?? null;
+    }
+
+    const nextIndex = queueIndex + 1;
+    if (nextIndex >= queue.length) {
+      if (repeat) return queue[0] ?? null;
+      return null;
+    }
+    return queue[nextIndex] ?? null;
+  },
+
+  nextSong: () => {
+    logWithTime(`⏩ nextSong chamado`);
+    const { queue, queueIndex, shuffle, repeat, shuffleQueue, shufflePos } = get();
+    if (queue.length === 0) {
+      logWithTime(`⏩ nextSong: fila vazia -> parando`);
+      return set({ currentSong: null, isPlaying: false });
+    }
+
+    if (shuffle) {
+      const nextPos = shufflePos + 1;
+      logWithTime(`⏩ nextSong (shuffle): shufflePos atual=${shufflePos}, nextPos=${nextPos}`);
+
+      if (nextPos >= shuffleQueue.length) {
+        if (repeat) {
+          const newShuffle = regenerateShuffleQueue(queue, queueIndex);
+          const firstIndex = newShuffle[0];
+          return set((state) => ({
+            shuffleQueue: newShuffle,
+            shufflePos: 0,
+            queueIndex: firstIndex,
+            currentSong: queue[firstIndex],
+            isPlaying: true,
+            restartSignal: queue.length === 1 ? state.restartSignal + 1 : state.restartSignal,
+          }));
+        }
+        return set({ currentSong: null, isPlaying: false, progress: 0, currentTime: 0 });
+      }
+
+      const nextIndex = shuffleQueue[nextPos];
+      const next = queue[nextIndex];
+      api.db.recents.add(next.id).catch(() => {});
+      return set({ shufflePos: nextPos, queueIndex: nextIndex, currentSong: next, isPlaying: true });
+    }
+
+    // Modo normal
+    const nextIndex = queueIndex + 1;
+    logWithTime(`⏩ nextSong (normal): queueIndex atual=${queueIndex}, próximo índice=${nextIndex}`);
+
+    if (nextIndex >= queue.length) {
+      if (repeat) {
+        return set((state) => ({
+          queueIndex: 0,
+          currentSong: queue[0],
+          isPlaying: true,
+          restartSignal: queue.length === 1 ? state.restartSignal + 1 : state.restartSignal,
+        }));
+      }
+      return set({ currentSong: null, isPlaying: false, progress: 0, currentTime: 0 });
+    }
+
+    const next = queue[nextIndex];
+    api.db.recents.add(next.id).catch(() => {});
+    set({ queueIndex: nextIndex, currentSong: next, isPlaying: true });
+  },
+
+  previousSong: () => {
+    logWithTime(`⏪ previousSong chamado`);
+    const { queue, shuffle, shuffleQueue, shufflePos } = get();
+    if (queue.length === 0) return;
+
+    if (shuffle) {
+      const prevPos = shufflePos - 1;
+      if (prevPos < 0) return;
+      const prevIndex = shuffleQueue[prevPos];
+      return set({
+        shufflePos: prevPos,
+        queueIndex: prevIndex,
+        currentSong: queue[prevIndex],
+        isPlaying: true,
+      });
+    }
+
+    const { queueIndex } = get();
+    const prevIndex = queueIndex - 1;
+    if (prevIndex < 0) return;
+    set({ queueIndex: prevIndex, currentSong: queue[prevIndex], isPlaying: true });
+  },
+
+  // ────────── Controles de shuffle / repeat ──────────
+  toggleRepeat: () => {
+    const { repeat } = get();
+    logWithTime(`🔁 toggleRepeat: ${repeat} -> ${!repeat}`);
+    set({ repeat: !repeat });
+  },
+
+  shuffleRemaining: () => {
+    logWithTime(`🔀 shuffleRemaining`);
+    const { queue, queueIndex } = get();
+    if (queue.length === 0) return;
+
+    const past = queue.slice(0, queueIndex);
+    const current = queue[queueIndex];
+    const remaining = queue.map((_, i) => i).filter((i) => i > queueIndex);
+    const shuffled = shuffleArray(remaining).map((i) => queue[i]);
+    const newQueue = [...past, current, ...shuffled];
+
+    set({ queue: newQueue, shuffle: false, shuffleQueue: [], shufflePos: 0 });
+  },
+
+  // ────────── Rádio ──────────
+  setRadio: (radio) => {
+    const state = get();
+    if (state.isPlaying) state.setPlaying(false);
+    set({ currentRadio: radio, playerType: "radio", radioPlaying: false, radioBuffering: false });
+  },
+
+  clearRadio: () => {
+    const audio = get()._radioAudio;
+    if (audio) { audio.pause(); audio.src = ""; }
+    set({ currentRadio: null, playerType: "music", radioPlaying: false, radioBuffering: false });
+  },
+
+  stopRadioSilently: () => {
+    const audio = get()._radioAudio;
+    if (audio && !audio.paused) { audio.pause(); set({ radioPlaying: false }); }
+  },
+
+  playRadio: async (radio) => {
+    const state = get();
+    if (state.isPlaying) set({ isPlaying: false });
+
+    let audio = state._radioAudio;
+    if (!audio) {
+      audio = new Audio();
+      audio.preload = "none";
+      audio.volume = state.volume;
+      audio.addEventListener("play",    () => set({ radioPlaying: true,  radioBuffering: false }));
+      audio.addEventListener("pause",   () => set({ radioPlaying: false, radioBuffering: false }));
+      audio.addEventListener("waiting", () => set({ radioBuffering: true }));
+      audio.addEventListener("playing", () => set({ radioBuffering: false, radioPlaying: true }));
+      audio.addEventListener("error",   () => set({ radioPlaying: false, radioBuffering: false }));
+      set({ _radioAudio: audio });
+    }
+
+    if (!radio?.stream) return;
+
+    if (state.currentRadio?.id === radio.id && audio.src) {
+      if (audio.paused) {
+        try { set({ radioBuffering: true }); await audio.play(); } catch (e) { console.warn(e); }
+      }
+      return;
+    }
+
+    audio.pause();
+    audio.src = "";
+    audio.src = radio.stream;
+    audio.volume = state.volume;
+    set({ currentRadio: radio, playerType: "radio", radioBuffering: true });
+
+    try {
+      await audio.play();
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      console.error(err);
+      set({ radioBuffering: false });
+    }
+  },
+
+  pauseRadio: () => {
+    const audio = get()._radioAudio;
+    if (audio) { audio.pause(); set({ radioPlaying: false }); }
+  },
+
+  stopRadio: () => { get().clearRadio(); },
+
+  isRecording: false,
+  _mediaRecorder: null,
+  _recordingChunks: [],
+
+  startRecording: () => {
+    const state = get();
+    const audioEl = state._radioAudio;
+    if (!audioEl || state.isRecording) return;
+
+    const stream = audioEl.captureStream?.() ?? audioEl.mozCaptureStream?.();
+    if (!stream) return;
+
+    const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+      ? "audio/webm;codecs=opus"
+      : "audio/webm";
+
+    const recorder = new MediaRecorder(stream, { mimeType });
+    const chunks = [];
+
+    recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+
+    recorder.onstop = async () => {
+      const blob = new Blob(chunks, { type: mimeType });
+      const arrayBuffer = await blob.arrayBuffer();
+      const radioName = get().currentRadio?.name ?? "radio";
+      try {
+        // window.api.radio.saveRecording não existe no Capacitor — implemente conforme necessário
+        console.warn("saveRecording não implementado no Capacitor:", radioName, arrayBuffer);
+      } catch (e) {
+        console.error("❌ Erro ao salvar gravação:", e);
+      }
+      set({ isRecording: false, _mediaRecorder: null, _recordingChunks: [] });
+    };
+
+    recorder.start(1000);
+    set({ isRecording: true, _mediaRecorder: recorder, _recordingChunks: chunks });
+  },
+
+  stopRecording: () => {
+    const { _mediaRecorder, isRecording } = get();
+    if (!isRecording || !_mediaRecorder) return;
+    _mediaRecorder.stop();
+  },
+}));

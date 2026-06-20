@@ -1,0 +1,112 @@
+.track {
+  width: 100%;
+  height: 219px; /* 3 × 73px */
+}
+
+.slideWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 73px !important;
+}
+
+.card {
+  width: 80%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.6rem 1rem;
+  border-radius: 0.8rem;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+  min-height: 60px;
+  box-sizing: border-box;
+}
+
+/* centralização horizontal — mantido pois é o que funciona */
+.track :global(.swiper-slide) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* REMOVIDO o align-items: center do swiper-wrapper */
+
+.neighbor {
+  opacity: 0.6;
+  transform: scale(0.9);
+}
+
+.current {
+  opacity: 1;
+  transform: scale(1.05);
+  z-index: 1;
+  position: relative;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  box-shadow: 0 0 24px var(--accent1);
+}
+
+.current::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(to right, var(--accent1), var(--accent2));
+  z-index: -1;
+}
+
+.title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  color: var(--text-primary, #ffffff);
+}
+
+.artist {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 80%;
+  height: 219px;
+  padding: 0.6rem 1rem;
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  margin: 0.6rem auto;
+}
+
+.emptyIcon {
+  width: 1.6rem;
+  height: 1.6rem;
+  opacity: 0.6;
+  color: #fff;
+}
+
+.emptyTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-top: 0.5rem;
+}
+
+.emptySubtitle {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.25rem;
+}

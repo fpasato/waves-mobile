@@ -1,0 +1,247 @@
+/* src/components/LibraryScreen/style.module.css */
+
+/* ============================================================
+   Container principal - bordas retas, vidro escuro
+   ============================================================ */
+.screenContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: rgba(10, 10, 14, 0.75);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  color: #fff;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================
+   Barra de estatísticas + ações
+   ============================================================ */
+.statsBar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.statsGrid {
+  display: flex;
+  gap: 10px;
+}
+
+.statCard {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background 0.2s ease;
+}
+
+.statCard:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.statCard h2 {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+}
+
+.statCard p {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  color: #fff;
+  line-height: 1.2;
+}
+
+/* Botões de ação do topo */
+.headerActions {
+  display: flex;
+  gap: 10px;
+}
+
+.headerActions button {
+  flex: 1;
+  height: 46px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animação de clique: escala + brilho momentâneo */
+.headerActions button:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.12);
+  transition: all 0.1s ease;
+}
+
+/* Botão "Tocar Todas" com accent, sem sombra */
+.headerActions button:first-child {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+
+.headerActions button:first-child:active {
+  background: var(--accent);
+  filter: brightness(1.2);
+  transform: scale(0.96);
+}
+
+/* Botão "Voltar" permanece neutro */
+.backButton {
+  /* herda o estilo neutro */
+}
+
+/* ============================================================
+   Lista de músicas
+   ============================================================ */
+.listContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 14px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.listContainer::-webkit-scrollbar {
+  width: 4px;
+}
+
+.listContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.listContainer::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.songList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Item de música */
+.songItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.songItem:active {
+  background: rgba(255, 255, 255, 0.06);
+  transform: scale(0.98);
+}
+
+.songItem h3 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 55%;
+  color: #fff;
+}
+
+.songActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Botões circulares dos itens */
+.songActions button {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(4px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animação de clique melhorada: escala + brilho + ondulação */
+.songActions button:active {
+  transform: scale(0.88);
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  transition: all 0.1s ease;
+}
+
+/* Toque sutil de accent no botão play quando pressionado */
+.songActions button:first-child:active {
+  color: var(--accent);
+  background: rgba(124, 92, 252, 0.15);  /* tom bem discreto */
+}
+
+/* ============================================================
+   Estados vazios / loading
+   ============================================================ */
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 56px 20px;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.loadingContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+}

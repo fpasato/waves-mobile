@@ -1,0 +1,213 @@
+/* style.module.css — Mobile-first para DirectoriesSettings */
+
+/* Reset local e base */
+.DirectoriesContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: var(--background, #151515);
+  color: var(--text, #ffffff);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Card principal */
+.card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--background);
+  border: 1px solid var(--mid, #373737);
+  border-radius: 1.25rem;
+  padding: 1.5rem 1.25rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-sizing: border-box;
+}
+
+/* Cabeçalho */
+.header h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--accent1, #FFDFB9);
+  letter-spacing: -0.02em;
+}
+
+.header p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+/* Seção de configuração de scan */
+.scanSettingsSection {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--mid);
+}
+
+.optionTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.optionTitle strong {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.optionTitle span {
+  font-size: 0.8125rem;
+  opacity: 0.65;
+  line-height: 1.3;
+}
+
+/* Grupo de radio buttons — touch-friendly */
+.radioGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.radioOption {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 2rem;
+  background: var(--mid);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.radioOption:active {
+  transform: scale(0.96);
+}
+
+.radioOption:has(input:checked) {
+  background: var(--accent2, #A4193D);
+  border-color: var(--accent1);
+  color: var(--text);
+}
+
+.radioOption input[type="radio"] {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 2px solid var(--accent1);
+  background: transparent;
+  margin: 0;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.radioOption input[type="radio"]:checked {
+  background: var(--accent1);
+  box-shadow: 0 0 6px var(--accent1);
+}
+
+/* Área de ações */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+/* Botão customizado — estende o componente <Button>, 
+   mas garante estilo responsivo e touch */
+.actions button,
+.actions > * {
+  width: 100%;
+  min-height: 3.125rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--accent2);
+  color: var(--text);
+  border: 1px solid var(--accent1);
+  transition: all 0.15s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.actions button:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+.actions button:disabled {
+  opacity: 0.45;
+  transform: none;
+  pointer-events: none;
+}
+
+/* Botão de perigo (limpar banco) */
+.dangerButton {
+  background: transparent !important;
+  border: 1px solid var(--mid) !important;
+  color: var(--text) !important;
+  opacity: 0.8;
+}
+
+.dangerButton:active {
+  background: rgba(164, 25, 61, 0.15) !important;
+  border-color: var(--accent2) !important;
+}
+
+/* Status / mensagem */
+.status {
+  margin-top: 0.25rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 223, 185, 0.06);
+  border-left: 3px solid var(--accent1);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--text);
+  opacity: 0.9;
+  word-break: break-word;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Ajustes para telas muito pequenas (ex: 320px) */
+@media screen and (max-width: 360px) {
+  .card {
+    padding: 1.25rem 1rem;
+  }
+  .radioGroup {
+    gap: 0.4rem;
+  }
+  .radioOption {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.8125rem;
+  }
+}

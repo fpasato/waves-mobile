@@ -1,0 +1,101 @@
+.playerArea {
+  padding: 0 1.25rem 1.5rem;
+  background: transparent; /* gradiente fica no SongImages ou no playerScreen */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.songInfo h3 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.songInfo p {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 2px;
+}
+
+.bottomRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+
+.musicInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.6rem;
+  padding: 1rem;
+  border-radius: 0.6rem;
+
+  background-color: rgba(0, 0, 0, 0.4); 
+  backdrop-filter: blur(12px); 
+  -webkit-backdrop-filter: blur(12px); 
+  border: 1px solid rgba(255, 255, 255, 0.08); 
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); 
+
+  & .musicDetails {
+    flex: 1;
+    min-width: 0; 
+  }
+
+  & h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #ffffff; 
+    white-space: nowrap;     
+    overflow: hidden;      
+    text-overflow: ellipsis; 
+  }
+
+  & p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* overlay opcional para escurecer o fundo */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
+
+.content{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background-color: var(--background);
+  width: 100%;
+  height: 3rem;
+}
+
+.playerScreen {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--background);  
+  gap: 10px;                 
+}

@@ -1,0 +1,243 @@
+/* PlaybackSettings/style.module.css */
+
+.container {
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  color: #fff;
+}
+
+.header h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  background: linear-gradient(
+    to right,
+    var(--accent1, #FFDFB9),
+    var(--accent2, #A4193D)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header p {
+  margin: 0;
+  opacity: 0.6;
+  font-size: 0.85rem;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(6px);
+}
+
+.option.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Toggle Switch */
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toggleLabel input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleSwitch {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.toggleSwitch::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.toggleSwitch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggleLabel input:checked + .toggleSwitch::before {
+  background: linear-gradient(
+    to right,
+    var(--accent1, #FFDFB9),
+    var(--accent2, #A4193D)
+  );
+}
+
+.toggleLabel input:checked + .toggleSwitch::after {
+  transform: translateX(22px);
+}
+
+.toggleLabel:active .toggleSwitch::after {
+  transform: scale(0.9);
+}
+
+.toggleLabel input:checked:active + .toggleSwitch::after {
+  transform: translateX(22px) scale(0.9);
+}
+
+.description {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  line-height: 1.5;
+}
+
+/* Slider Wrapper */
+.sliderWrapper {
+  width: 100%;
+}
+
+/* Slider com preenchimento dinâmico */
+.slider {
+  width: 100%;
+  height: 24px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  margin: 4px 0;
+  outline: none;
+}
+
+/* Track – agora usa a variável --slider-fill */
+.slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent1, #FFDFB9) 0%,
+    var(--accent2, #A4193D) var(--slider-fill, 50%),
+    rgba(255, 255, 255, 0.15) var(--slider-fill, 50%)
+  );
+}
+
+.slider::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent1, #FFDFB9) 0%,
+    var(--accent2, #A4193D) var(--slider-fill, 50%),
+    rgba(255, 255, 255, 0.15) var(--slider-fill, 50%)
+  );
+  border: none;
+}
+
+/* Thumb */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+  cursor: pointer;
+  margin-top: -7px;
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+  cursor: pointer;
+}
+
+/* Ticks de segundos */
+.ticks {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+}
+
+/* Labels das faixas */
+.rangeLabels {
+  display: grid;
+  grid-template-columns: 30% 40% 30%;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #ffffff;
+  text-align: center;
+}
+
+.rangeLabels div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.rangeLabels span {
+  font-weight: 600;
+  color: #fff;
+}
+
+.rangeLabels small {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Botão Salvar */
+.saveButton {
+  align-self: flex-start;
+  padding: 0.6rem 1.5rem;
+  border-radius: 14px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: linear-gradient(
+    to right,
+    var(--accent1, #FFDFB9),
+    var(--accent2, #A4193D)
+  );
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  box-shadow: 0 0 14px rgba(255, 223, 185, 0.25);
+}
+
+.saveButton:active {
+  transform: scale(0.96);
+  box-shadow: 0 0 20px rgba(255, 223, 185, 0.5);
+}

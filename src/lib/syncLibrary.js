@@ -22,7 +22,7 @@ const META_FETCH_SIZE = 131_072;
 const MIN_DURATION_SECONDS = 30;
 
 /** Leituras de metadata em paralelo. Dois é mais seguro no storage Android. */
-const MAX_PARALLEL_META = 2;
+const MAX_PARALLEL_META = 1;
 
 // ─── Helpers básicos ─────────────────────────────────────────────────────────
 
@@ -71,14 +71,19 @@ async function fetchPartialBlob(relativePath) {
   const url = Capacitor.convertFileSrc(
     `file:///storage/emulated/0/${relativePath}`,
   );
+  const isM4a = /\.(m4a|aac|mp4)$/i.test(relativePath);
 
   try {
     const res = await fetch(url, {
-      headers: { Range: `bytes=0-${META_FETCH_SIZE - 1}` },
+      headers: isM4a ? {} : { Range: `bytes=0-${META_FETCH_SIZE - 1}` },
     });
-    if (res.ok || res.status === 206) return await res.blob();
+    if (res.ok || res.status === 206) {
+      const blob = await res.blob();
+      // define o mimeType correto para o parser entender
+      return isM4a ? new Blob([blob], { type: "audio/mp4" }) : blob;
+    }
   } catch {
-    // Segue para o fallback
+    // fallback abaixo
   }
 
   try {
@@ -86,7 +91,7 @@ async function fetchPartialBlob(relativePath) {
       path: relativePath,
       directory: Directory.ExternalStorage,
     });
-    return base64ToBlob(result.data);
+    return base64ToBlob(result.data, isM4a ? "audio/mp4" : "audio/mpeg");
   } catch {
     return null;
   }
@@ -213,7 +218,7 @@ export async function startBackgroundEnrichment(onTrackEnriched, signal) {
       const enriched = await enrichTrack(track);
       if (enriched) onTrackEnriched?.(enriched);
 
-      await new Promise((r) => setTimeout(r, 80));
+      await new Promise((r) => setTimeout(r, 2000)); // era 80ms, agora 2s entre cada
       return enriched;
     });
 
@@ -311,7 +316,14 @@ export async function reloadLibraryFromDb() {
  * Escaneia todos os diretórios cadastrados, persiste no banco e
  * dispara o enriquecimento em background.
  */
-export async function refreshLibraryFromDisk() {
+
+export function toAudioSrc(path) {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  return Capacitor.convertFileSrc(path);
+}
+
+export async function refreshLibraryFromDisk(onTrackEnriched) {
   console.log("🔄 refreshLibraryFromDisk");
   const dirs = await api.db.directories.list();
 
@@ -323,7 +335,7 @@ export async function refreshLibraryFromDisk() {
     console.log(`💾 ${tracks.length} músicas salvas (banco).`);
   }
 
-  startBackgroundEnrichment();
+  startBackgroundEnrichment(onTrackEnriched);
 
   const songs = await api.db.songs.getAll();
   return songs.map((s) => ({ ...s, src: Capacitor.convertFileSrc(s.path) }));

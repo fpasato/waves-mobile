@@ -21,13 +21,11 @@ export function PlayerScreen({ setScreen }) {
   return (
     <div className={styles.playerScreen}>
       <Header title="Vibe" />
-      <div className={styles.content}>
-        <TopBar setScreen={setScreen} />
-      </div>
       <SongQueueStack />
       <div className={styles.playerArea}>
         <ProgressBar />
         <PlayerControls />
+        <TopBar setScreen={setScreen} />
       </div>
     </div>
   );

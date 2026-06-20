@@ -1,285 +1,270 @@
-/* ============================================================
-   PALETA (injetada como padrão – já que o contexto é dark)
-   ============================================================ */
-:root {
-  --background: #151515;
-  --text: #ffffff;
-  --mid: #373737;
-  --accent1: #ffdfb9;
-  --accent2: #a4193d;
-  --shadow: rgba(255, 255, 255, 0.346);
-  --fontsize: 1rem;
-}
+/* style.module.css */
 
-/* ============================================================
-   TELA PRINCIPAL
-   ============================================================ */
 .radioScreen {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  height: 100dvh; /* suporte a viewport dinâmica mobile */
-  background: var(--background);
+  background-color: var(--background);
   color: var(--text);
-  font-size: var(--fontsize);
+  font-family: 'Segoe UI', sans-serif;
+  position: relative;
   overflow: hidden;
 }
 
+/* Header permanece natural */
+.header {
+  flex-shrink: 0;
+}
+
+/* Área de conteúdo com scroll */
 .radioContent {
   flex: 1;
   overflow-y: auto;
-  padding: 0 1rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  padding: 16px;
+  padding-bottom: 130px;
+  /* espaço para player + botão fixo */
+  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 }
 
-/* ============================================================
-   TABS
-   ============================================================ */
+/* ================== Tabs ================== */
 .tabs {
   display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.75rem 0 0.25rem;
-  border-bottom: 2px solid var(--mid);
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--mid);
+  padding-bottom: 8px;
+  flex-wrap: wrap;
 }
 
 .tab {
-  background: none;
+  background: transparent;
   border: none;
   color: var(--text);
-  opacity: 0.6;
-  padding: 0.5rem 1rem;
-  font-size: 0.95rem;
-  font-weight: 500;
-  border-radius: 999px; /* pílula suave */
+  opacity: 0.7;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 20px;
   transition: all 0.2s;
-  min-height: 44px;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
+  gap: 6px;
 }
 
 .tabActive {
-  opacity: 1;
   background: var(--mid);
-  color: var(--accent1);
-  font-weight: 600;
+  opacity: 1;
 }
 
 .badge {
   background: var(--accent2);
-  color: white;
+  color: #fff;
   font-size: 0.7rem;
-  font-weight: bold;
-  padding: 0.15rem 0.45rem;
-  border-radius: 999px;
-  line-height: 1.2;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
 }
 
-/* "Voltar" como tab especial */
+/* ================== Wrapper fixo do botão (faixa de fundo) ================== */
+.backButtonWrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;                /* altura da faixa */
+  background: var(--background); /* fundo sólido atrás do botão */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 19;
+}
+
+/* ================== Botão Voltar (sem heranças da .tab) ================== */
 .backButton {
-  margin-left: auto;
-  font-weight: 500;
-  color: var(--accent1);
+  width: 90%;                
+  background: var(--accent2);  
+  color: #fff;                
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 0;
+  font-size: 1rem;
+  justify-content: center;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  opacity: 1;                  /* totalmente opaco */
+  transition: background 0.2s;
 }
 
-/* ============================================================
-   BUSCA
-   ============================================================ */
+.backButton:hover {
+  background: var(--accent1);
+  color: #000;                 /* texto escuro sobre fundo claro */
+}
+
+.backButton:active {
+  filter: brightness(0.9);
+}
+
+
+
+/* ================== Busca ================== */
 .searchArea {
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
+  margin-bottom: 16px;
   align-items: center;
-  position: relative;
-  width: 100%;
 }
 
 .searchArea input[type="search"] {
   flex: 1;
   background: var(--mid);
-  border: 2px solid transparent;
-  border-radius: 999px;
-  padding: 0.65rem 1rem;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
   color: var(--text);
-  font-size: 1rem;
+  font-size: 0.9rem;
   outline: none;
-  transition: border-color 0.2s;
-  min-width: 0;
 }
 
-.searchArea input[type="search"]:focus {
-  border-color: var(--accent1);
+.searchArea input[type="search"]::placeholder {
+  color: var(--text);
+  opacity: 0.5;
 }
 
 .clearBtn {
-  position: absolute;
-  right: 3.8rem; /* espaço para o botão de busca */
-  background: none;
+  background: transparent;
   border: none;
   color: var(--text);
+  opacity: 0.7;
   font-size: 1.2rem;
   cursor: pointer;
-  padding: 0.4rem;
-  opacity: 0.7;
-  min-width: 44px;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 4px;
 }
 
 .searchBtn {
-  background: var(--accent1);
-  color: var(--background);
-  font-weight: bold;
+  background: var(--accent2);
+  color: #000;
   border: none;
-  border-radius: 999px;
-  padding: 0.65rem 1.25rem;
-  font-size: 0.95rem;
-  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s;
-  white-space: nowrap;
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 4px;
+  transition: background 0.2s;
 }
 
 .searchBtn:disabled {
   opacity: 0.5;
-  filter: grayscale(0.4);
   cursor: not-allowed;
 }
 
-/* ============================================================
-   SEÇÕES E MENSAGENS
-   ============================================================ */
-.popularSection {
-  margin-top: 0.5rem;
-}
-
-.sectionTitle {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: var(--accent1);
-  letter-spacing: 0.02em;
-}
-
+/* ================== Feedback ================== */
 .errorMsg {
-  background: var(--accent2);
-  color: white;
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-align: center;
-  margin-top: 0.5rem;
-}
-
-.loadingRow {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 2rem 1rem;
-  color: var(--text);
-  opacity: 0.8;
-  justify-content: center;
+  color: #ff6b6b;
+  background: rgba(255, 0, 0, 0.1);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
 }
 
 .emptyMsg {
   text-align: center;
   color: var(--text);
   opacity: 0.5;
-  padding: 3rem 1rem;
-  font-size: 0.95rem;
+  margin-top: 32px;
 }
 
-/* ============================================================
-   LISTA DE RÁDIOS
-   ============================================================ */
+.loadingRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  opacity: 0.7;
+  padding: 16px 0;
+}
+
+/* ================== Seção "Em alta" ================== */
+.popularSection {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+/* ================== Lista de rádios ================== */
 .radioList {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding-bottom: 0.5rem;
+  gap: 12px;
 }
 
-/* ============================================================
-   CARD DE RÁDIO
-   ============================================================ */
+/* ================== Cartão (CORRIGIDO) ================== */
 .radioCard {
   background: var(--mid);
-  border-radius: 16px;
-  padding: 0.75rem;
+  border-radius: 12px;
+  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  transition: background 0.2s, box-shadow 0.2s;
-  border: 2px solid transparent;
-  -webkit-tap-highlight-color: transparent;
+  gap: 12px;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .radioCardActive {
-  border-color: var(--accent1);
-  box-shadow: 0 0 12px var(--shadow);
+  background: var(--accent2);
+  color: #000;
 }
 
+/* Botão principal do cartão – adicionado min-width: 0 para evitar overflow */
 .cardMain {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
   flex: 1;
   min-width: 0;
+  /* ← impede que o conteúdo force o aumento */
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
   text-align: left;
   color: inherit;
-  -webkit-tap-highlight-color: transparent;
 }
 
-/* Miniatura / imagem */
+/* Thumb */
 .cardThumb {
-  position: relative;
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--background);
-  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: var(--mid);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
 }
 
 .cardThumb img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  background: var(--background);
+  object-fit: cover;
 }
 
 .cardInitial {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--accent1);
+  font-weight: bold;
   text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
+  color: var(--text);
 }
 
-/* Overlay de tocando/buffering */
 .cardActiveOverlay {
   position: absolute;
   inset: 0;
@@ -287,110 +272,159 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(2px);
 }
 
-/* Informações do card */
+/* ================== Ícones animados ================== */
+.waveIcon {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 20px;
+}
+
+.waveIcon span {
+  width: 3px;
+  background: #fff;
+  border-radius: 2px;
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+.waveIcon span:nth-child(1) {
+  height: 10px;
+  animation-delay: 0s;
+}
+
+.waveIcon span:nth-child(2) {
+  height: 16px;
+  animation-delay: 0.2s;
+}
+
+.waveIcon span:nth-child(3) {
+  height: 12px;
+  animation-delay: 0.4s;
+}
+
+.waveIcon span:nth-child(4) {
+  height: 14px;
+  animation-delay: 0.6s;
+}
+
+@keyframes wave {
+
+  0%,
+  100% {
+    transform: scaleY(0.6);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ================== Informações do cartão ================== */
 .cardInfo {
   flex: 1;
   min-width: 0;
+  /* ← já estava aqui, reforça o truncamento */
 }
 
 .cardName {
   font-weight: 600;
   font-size: 0.95rem;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 0.15rem;
+  /* ← corta nome longo com "..." */
 }
 
 .cardMeta {
   font-size: 0.8rem;
-  color: var(--text);
   opacity: 0.7;
-  margin-bottom: 0.3rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  margin: 2px 0;
 }
 
 .cardTags {
   display: flex;
+  gap: 6px;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  margin-top: 4px;
 }
 
 .cardTag {
-  background: var(--accent2);
-  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
   font-size: 0.7rem;
-  font-weight: 600;
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  letter-spacing: 0.02em;
 }
 
-/* Ações do card (play e favorito) */
+/* ================== Ações do cartão (play/fav) ================== */
 .cardActions {
   display: flex;
-  flex-direction: column;
+  gap: 8px;
   align-items: center;
-  gap: 0.35rem;
   flex-shrink: 0;
+  /* ← nunca encolhe, mantém os botões visíveis */
 }
 
 .playBtn,
 .favBtn {
-  background: var(--background);
+  background: transparent;
   border: none;
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  font-size: 1.3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text);
+  font-size: 1.2rem;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
 }
 
-.playBtn:active,
-.favBtn:active {
-  transform: scale(0.92);
+.playBtn:hover,
+.favBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .favBtnActive {
-  color: var(--accent2);
-  background: var(--accent1);
+  color: #e74c3c;
 }
 
-/* ============================================================
-   PLAYER FIXO (rodapé)
-   ============================================================ */
+/* ================== Player fixo ================== */
 .player {
+  position: fixed;
+  bottom: 70px;              
+  left: 0;
+  width: 100%;
+  background: var(--mid);
+  border-top: 1px solid var(--accent2);
+  padding: 12px 16px;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: var(--mid);
-  border-top: 2px solid var(--background);
-  position: sticky;
-  bottom: 0;
+  gap: 12px;
+  z-index: 15;
   box-shadow: 0 -4px 12px var(--shadow);
-  z-index: 10;
-  min-height: 64px;
 }
 
 .playerThumb {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: var(--mid);
   overflow: hidden;
-  background: var(--background);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -400,8 +434,7 @@
 .playerThumb img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  background: var(--background);
+  object-fit: cover;
 }
 
 .playerInfo {
@@ -411,111 +444,34 @@
 
 .playerName {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .playerMeta {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   opacity: 0.7;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  margin: 0;
 }
 
 .playerBtn {
-  background: var(--accent1);
-  color: var(--background);
+  background: var(--accent2);
   border: none;
+  color: #000;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s;
-  flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
 }
 
 .playerBtn:disabled {
-  opacity: 0.6;
-}
-
-/* ============================================================
-   ÍCONES E SPINNER
-   ============================================================ */
-.waveIcon {
-  display: inline-flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 1em;
-}
-
-.waveIcon span {
-  display: inline-block;
-  width: 3px;
-  background: var(--accent1);
-  border-radius: 2px;
-  animation: wave 1.2s ease-in-out infinite;
-}
-.waveIcon span:nth-child(1) { height: 60%; animation-delay: 0s; }
-.waveIcon span:nth-child(2) { height: 100%; animation-delay: 0.2s; }
-.waveIcon span:nth-child(3) { height: 80%; animation-delay: 0.4s; }
-.waveIcon span:nth-child(4) { height: 40%; animation-delay: 0.6s; }
-
-@keyframes wave {
-  0%, 100% { transform: scaleY(1); }
-  50% { transform: scaleY(0.3); }
-}
-
-.spinner {
-  width: 1em;
-  height: 1em;
-  border: 2px solid var(--text);
-  border-top-color: var(--accent1);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  display: inline-block;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ============================================================
-   SCROLLBAR SUTIL (mobile não precisa, mas fica limpo)
-   ============================================================ */
-.radioContent::-webkit-scrollbar {
-  width: 4px;
-}
-.radioContent::-webkit-scrollbar-thumb {
-  background: var(--mid);
-  border-radius: 4px;
-}
-
-/* ============================================================
-   AJUSTES PARA TELAS MUITO PEQUENAS (ex: iPhone SE)
-   ============================================================ */
-@media (max-width: 380px) {
-  .cardThumb {
-    width: 48px;
-    height: 48px;
-  }
-  .playerThumb {
-    width: 40px;
-    height: 40px;
-  }
-  .playBtn,
-  .favBtn,
-  .playerBtn {
-    width: 40px;
-    height: 40px;
-    font-size: 1.1rem;
-  }
+  opacity: 0.5;
 }

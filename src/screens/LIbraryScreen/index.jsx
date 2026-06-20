@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { usePlayerStore } from "../../store/playerStore";
 import { Header } from "../../components/Header";
 import { Button } from "../../components/Button";
 import styles from "./style.module.css";
-import { FaPlay } from "react-icons/fa";
 import { MdOutlineAddToPhotos } from "react-icons/md";
 
 export function LibraryScreen({ setScreen }) {
@@ -12,12 +11,11 @@ export function LibraryScreen({ setScreen }) {
     playSong,
     addToQueue,
     setQueue,
-    reloadLibraryFromDatabase, // carrega apenas do banco (leve)
+    reloadLibraryFromDatabase,
   } = usePlayerStore();
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // Carrega do banco apenas se a biblioteca estiver vazia (primeira vez)
   useEffect(() => {
     if (library.length === 0) {
       setIsLoading(true);
@@ -25,9 +23,8 @@ export function LibraryScreen({ setScreen }) {
         .catch(console.error)
         .finally(() => setIsLoading(false));
     }
-  }, []); // executa apenas na montagem
+  }, []);
 
-  // Cálculos derivados
   const totalSeconds = library.reduce(
     (acc, song) => acc + (song.duration || 0),
     0
@@ -40,6 +37,13 @@ export function LibraryScreen({ setScreen }) {
     const secs = Math.floor(seconds % 60);
     if (hours > 0) return `${hours}h ${minutes}min`;
     return `${minutes}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  // Ação de tocar uma música específica
+  const handlePlaySong = (song) => {
+    addToQueue(song);
+    playSong(song, [song]);
+    setScreen("player");
   };
 
   return (
@@ -73,11 +77,6 @@ export function LibraryScreen({ setScreen }) {
                   setScreen("player");
                 }}
               />
-              <Button
-                title="Voltar"
-                className={styles.backButton}
-                onClick={() => setScreen("player")}
-              />
             </div>
           </div>
 
@@ -86,19 +85,22 @@ export function LibraryScreen({ setScreen }) {
               {library.length > 0 ? (
                 library.map((song, index) => (
                   <li key={song.id ?? index} className={styles.songItem}>
-                    <h3>{song.title}</h3>
+                    {/* Card clicável para tocar a música */}
+                    <button
+                      className={styles.songPlayButton}
+                      onClick={() => handlePlaySong(song)}
+                    >
+                      <h3>{song.title}</h3>
+                    </button>
+
+                    {/* Botão de adicionar à fila (não dispara o play) */}
                     <div className={styles.songActions}>
                       <Button
-                        title={<FaPlay />}
-                        onClick={() => {
-                          addToQueue(song);
-                          playSong(song, [song]);
-                          setScreen("player");
-                        }}
-                      />
-                      <Button
                         title={<MdOutlineAddToPhotos />}
-                        onClick={() => addToQueue(song)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToQueue(song);
+                        }}
                       />
                     </div>
                   </li>
@@ -112,6 +114,16 @@ export function LibraryScreen({ setScreen }) {
           </div>
         </>
       )}
+
+      {/* Botão Voltar fixo */}
+      <div className={styles.backButtonWrapper}>
+        <button
+          onClick={() => setScreen("player")}
+          className={styles.backButton}
+        >
+          Voltar
+        </button>
+      </div>
     </div>
   );
 }

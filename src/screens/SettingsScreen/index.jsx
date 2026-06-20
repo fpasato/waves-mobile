@@ -37,15 +37,16 @@ export function SettingsScreen({ setScreen }) {
           {tab === "directories" && <DirectoriesSettings />}
           {tab === "crossfade" && <PlaybackSettings />}
           {tab === "tema" && <Tema />}
-
         </div>
 
-        <button
-          onClick={() => setScreen("player")}
-          className={styles.backButton}
-        >
-          Voltar
-        </button>
+        <div className={styles.backButtonWrapper}>
+          <button
+            onClick={() => setScreen("player")}
+            className={`${styles.tab} ${styles.backButton}`}
+          >
+            Voltar
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -97,5 +97,6 @@
   max-width: 480px;
   margin: 0 auto;
   background: var(--background);  
-  gap: 10px;                 
+  gap: 10px;            
+  overflow: hidden;     
 }

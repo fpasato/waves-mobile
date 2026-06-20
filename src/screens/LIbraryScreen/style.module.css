@@ -1,23 +1,23 @@
 /* src/components/LibraryScreen/style.module.css */
 
 /* ============================================================
-   Container principal - bordas retas, vidro escuro
+   Container principal
    ============================================================ */
 .screenContainer {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100vh;
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
-  background: rgba(10, 10, 14, 0.75);
+  background: var(--background);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   border-radius: 0;
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   overflow: hidden;
-  color: #fff;
+  color: var(--text);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -40,10 +40,10 @@
 
 .statCard {
   flex: 1;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--mid);
   border-radius: 12px;
   padding: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--shadow);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -51,7 +51,7 @@
 }
 
 .statCard:active {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--shadow);
 }
 
 .statCard h2 {
@@ -59,7 +59,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--text);
+  opacity: 0.35;
   margin: 0;
 }
 
@@ -67,11 +68,10 @@
   font-size: 1.4rem;
   font-weight: 700;
   margin: 0;
-  color: #fff;
+  color: var(--text);
   line-height: 1.2;
 }
 
-/* Botões de ação do topo */
 .headerActions {
   display: flex;
   gap: 10px;
@@ -90,37 +90,35 @@
   gap: 6px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.8);
+  background: var(--mid);
+  /* tom médio */
+  color: var(--text);
+  opacity: 0.8;
   backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--shadow);
   position: relative;
   overflow: hidden;
 }
 
-/* Animação de clique: escala + brilho momentâneo */
 .headerActions button:active {
   transform: scale(0.96);
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--shadow);
   transition: all 0.1s ease;
 }
 
-/* Botão "Tocar Todas" com accent, sem sombra */
+/* Botão "Tocar Todas" com cor de destaque */
 .headerActions button:first-child {
-  background: var(--accent);
+  background: var(--accent2);
   color: #fff;
+  /* mantém texto branco para contraste */
   border: none;
+  opacity: 1;
 }
 
 .headerActions button:first-child:active {
-  background: var(--accent);
+  background: var(--accent2);
   filter: brightness(1.2);
   transform: scale(0.96);
-}
-
-/* Botão "Voltar" permanece neutro */
-.backButton {
-  /* herda o estilo neutro */
 }
 
 /* ============================================================
@@ -143,7 +141,7 @@
 }
 
 .listContainer::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--shadow);
   border-radius: 2px;
 }
 
@@ -156,48 +154,72 @@
   gap: 4px;
 }
 
-/* Item de música */
 .songItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.02);
+  padding: 0;
+
+  background: var(--mid);
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--shadow);
   transition: background 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .songItem:active {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--shadow);
   transform: scale(0.98);
 }
 
-.songItem h3 {
+.songPlayButton {
+  flex: 1;
+  min-width: 0;
+  /* permite encolher */
+  overflow: hidden;
+  /* garante o corte do conteúdo */
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Título dentro do botão – sem limite de largura, com truncamento */
+.songPlayButton h3 {
   font-size: 0.9rem;
   font-weight: 500;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 55%;
-  color: #fff;
+  color: var(--text);
+  /* NENHUM max-width aqui – o botão controla a largura */
 }
 
+/* Ações nunca encolhem */
 .songActions {
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-shrink: 0;
+  /* mantém o botão de adicionar sempre visível */
 }
 
-/* Botões circulares dos itens */
 .songActions button {
   width: 38px;
   height: 38px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.7);
+  background: var(--mid);
+  color: var(--text);
+  opacity: 0.7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -209,18 +231,18 @@
   overflow: hidden;
 }
 
-/* Animação de clique melhorada: escala + brilho + ondulação */
 .songActions button:active {
   transform: scale(0.88);
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-  transition: all 0.1s ease;
+  background: var(--shadow);
+  color: var(--text);
+  opacity: 1;
 }
 
-/* Toque sutil de accent no botão play quando pressionado */
+/* Destaque no botão play ao pressionar */
 .songActions button:first-child:active {
-  color: var(--accent);
-  background: rgba(124, 92, 252, 0.15);  /* tom bem discreto */
+  color: var(--accent2);
+  background: rgba(164, 25, 61, 0.15);
+  /* baseado no accent2 */
 }
 
 /* ============================================================
@@ -231,7 +253,8 @@
   justify-content: center;
   align-items: center;
   padding: 56px 20px;
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--text);
+  opacity: 0.25;
   font-size: 0.9rem;
   text-align: center;
 }
@@ -241,7 +264,58 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--text);
+  opacity: 0.35;
   font-size: 0.85rem;
   letter-spacing: 0.03em;
+}
+
+/* ============================================================
+   Botão Voltar fixo
+   ============================================================ */
+
+/* Faixa de fundo que cobre toda a largura da tela */
+.backButtonWrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background: var(--background);
+  /* fundo sólido principal */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 19;
+}
+
+/* Botão propriamente dito */
+.backButton {
+  width: 90%;
+  padding: 14px 0;
+  background: var(--accent2);
+  /* cor de destaque */
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: background 0.2s, color 0.2s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.backButton:hover {
+  background: var(--accent1);
+  color: #000;
+}
+
+.backButton:active {
+  filter: brightness(0.9);
 }

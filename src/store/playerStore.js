@@ -3,6 +3,7 @@ import {
   refreshLibraryFromDisk,
   reloadLibraryFromDb,
 } from "../lib/syncLibrary";
+import { api } from "../database/database";
 
 // ─── Helpers ───────────────────────────────────────────
 function logWithTime(...args) {
@@ -26,7 +27,6 @@ function shuffleArray(array) {
   return arr;
 }
 
-// Cria uma shuffleQueue com currentIndex na primeira posição e o resto embaralhado
 function createShuffleQueue(queue, currentIndex) {
   const allIndices = queue.map((_, i) => i);
   const remaining = allIndices.filter((i) => i !== currentIndex);
@@ -34,8 +34,6 @@ function createShuffleQueue(queue, currentIndex) {
   return [currentIndex, ...shuffled];
 }
 
-// Gera uma nova fila aleatória (todos os índices), evitando que a música atual seja a primeira,
-// a menos que a fila tenha apenas uma música.
 function regenerateShuffleQueue(queue, excludeIndex) {
   const indices = queue.map((_, i) => i);
   let shuffled = shuffleArray(indices);
@@ -45,7 +43,6 @@ function regenerateShuffleQueue(queue, excludeIndex) {
   }
   return shuffled;
 }
-
 
 export const usePlayerStore = create((set, get) => ({
   // ─── Estado principal de reprodução ──────────────────
@@ -68,11 +65,10 @@ export const usePlayerStore = create((set, get) => ({
 
   // ─── Rádio ───────────────────────────────────────────
   currentRadio: null,
-  playerType: "music", // "music" | "radio"
+  playerType: "music",
   radioPlaying: false,
   radioBuffering: false,
-  _radioAudio: null, // referência interna ao objeto Audio
-
+  _radioAudio: null,
 
   // ─── Crossfade ───────────────────────────────────────
   fadeEnabled: false,
@@ -97,7 +93,6 @@ export const usePlayerStore = create((set, get) => ({
   dismissToast: (id) => {
     set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
   },
-  // ─── Ações ───────────────────────────────────────────
 
   // ────────── Preferências ──────────
   setParticlesEnabled: (value) => {
@@ -118,10 +113,9 @@ export const usePlayerStore = create((set, get) => ({
 
   loadPlaybackSettings: async () => {
     logWithTime(`⚙️ loadPlaybackSettings iniciado`);
-    if (typeof window === "undefined" || !window.api?.settings) return;
     try {
-      const en = await window.api.settings.get("fadeEnabled");
-      const du = await window.api.settings.get("fadeDuration");
+      const en = await api.settings.get("fadeEnabled");
+      const du = await api.settings.get("fadeDuration");
       const parsed = parseFloat(du ?? "3", 10);
       const newFadeEnabled = en === "true";
       const newFadeDuration = Math.min(
@@ -181,7 +175,6 @@ export const usePlayerStore = create((set, get) => ({
     logWithTime(`🔊 setVolume: ${value}`);
     const state = get();
     set({ volume: value });
-    // Sincronizar volume com o rádio se estiver ativo
     if (state._radioAudio) {
       state._radioAudio.volume = value;
     }
@@ -339,37 +332,22 @@ export const usePlayerStore = create((set, get) => ({
         if (removedPos !== -1) {
           if (removedPos < state.shufflePos) {
             shufflePos = state.shufflePos - 1;
-            logWithTime(
-              `➖ removeFromQueue: removedPos antes do shufflePos, novo shufflePos=${shufflePos}`,
-            );
           } else if (removedPos === state.shufflePos) {
             if (shuffleQueue.length > 0) {
               shufflePos = Math.min(shufflePos, shuffleQueue.length - 1);
               queueIndex = shuffleQueue[shufflePos];
-              logWithTime(
-                `➖ removeFromQueue: música atual removida, novo queueIndex=${queueIndex} via shuffleQueue[${shufflePos}]`,
-              );
             } else {
               shufflePos = 0;
-              logWithTime(
-                `➖ removeFromQueue: shuffleQueue vazia após remoção, shufflePos=0`,
-              );
             }
-          } // else: nada muda na shufflePos
+          }
         }
         if (!shuffleQueue.includes(queueIndex) && shuffleQueue.length > 0) {
           shuffleQueue = [queueIndex, ...shuffleQueue];
           shufflePos = 0;
-          logWithTime(
-            `➖ removeFromQueue: queueIndex não estava na shuffleQueue, reinserido no início`,
-          );
         }
       }
 
       const currentSong = queue[queueIndex] ?? queue[0];
-      logWithTime(
-        `➖ removeFromQueue final: novo queueIndex=${queueIndex}, nova currentSong=${currentSong?.title}, shufflePos=${shufflePos}`,
-      );
       return { queue, queueIndex, currentSong, shuffleQueue, shufflePos };
     }),
 
@@ -399,7 +377,7 @@ export const usePlayerStore = create((set, get) => ({
       shuffleQueue,
       shufflePos,
     });
-    window.api.db.recents.add(song.id);
+    api.db.recents.add(song.id).catch(() => {});
   },
 
   setSong: (song) => {
@@ -423,7 +401,7 @@ export const usePlayerStore = create((set, get) => ({
           queueIndex: index,
           shufflePos: pos,
         });
-        window.api.db.recents.add(song.id);
+        api.db.recents.add(song.id).catch(() => {});
         return;
       }
       logWithTime(`🎵 setSong: índice não está na shuffleQueue, recriando`);
@@ -434,7 +412,7 @@ export const usePlayerStore = create((set, get) => ({
         shuffleQueue: createShuffleQueue(queue, index),
         shufflePos: 0,
       });
-      window.api.db.recents.add(song.id);
+      api.db.recents.add(song.id).catch(() => {});
       return;
     }
 
@@ -445,7 +423,7 @@ export const usePlayerStore = create((set, get) => ({
       queueIndex: index,
       shufflePos: 0,
     });
-    window.api.db.recents.add(song.id);
+    api.db.recents.add(song.id).catch(() => {});
   },
 
   peekNextSong: () => {
@@ -482,7 +460,7 @@ export const usePlayerStore = create((set, get) => ({
     if (shuffle) {
       const nextPos = shufflePos + 1;
       logWithTime(
-        `⏩ nextSong (shuffle): shufflePos atual=${shufflePos}, nextPos=${nextPos}, shuffleQueue.length=${shuffleQueue.length}`,
+        `⏩ nextSong (shuffle): shufflePos atual=${shufflePos}, nextPos=${nextPos}`,
       );
 
       if (nextPos >= shuffleQueue.length) {
@@ -511,6 +489,7 @@ export const usePlayerStore = create((set, get) => ({
 
       const nextIndex = shuffleQueue[nextPos];
       const next = queue[nextIndex];
+      api.db.recents.add(next.id).catch(() => {});
       return set({
         shufflePos: nextPos,
         queueIndex: nextIndex,
@@ -544,37 +523,19 @@ export const usePlayerStore = create((set, get) => ({
     }
 
     const next = queue[nextIndex];
-    set({
-      queueIndex: nextIndex,
-      currentSong: next,
-      isPlaying: true,
-    });
-    window.api.db.recents.add(next.id);
+    api.db.recents.add(next.id).catch(() => {});
+    set({ queueIndex: nextIndex, currentSong: next, isPlaying: true });
   },
 
   previousSong: () => {
     logWithTime(`⏪ previousSong chamado`);
     const { queue, shuffle, shuffleQueue, shufflePos } = get();
-    if (queue.length === 0) {
-      logWithTime(`⏪ previousSong: fila vazia -> ignorando`);
-      return;
-    }
+    if (queue.length === 0) return;
 
     if (shuffle) {
       const prevPos = shufflePos - 1;
-      logWithTime(
-        `⏪ previousSong (shuffle): shufflePos atual=${shufflePos}, prevPos=${prevPos}`,
-      );
-      if (prevPos < 0) {
-        logWithTime(
-          `⏪ previousSong (shuffle): já no início da shuffleQueue -> ignorando`,
-        );
-        return;
-      }
+      if (prevPos < 0) return;
       const prevIndex = shuffleQueue[prevPos];
-      logWithTime(
-        `⏪ previousSong (shuffle): retrocedendo para shufflePos=${prevPos}, queueIndex=${prevIndex} (${queue[prevIndex]?.title})`,
-      );
       return set({
         shufflePos: prevPos,
         queueIndex: prevIndex,
@@ -585,18 +546,7 @@ export const usePlayerStore = create((set, get) => ({
 
     const { queueIndex } = get();
     const prevIndex = queueIndex - 1;
-    logWithTime(
-      `⏪ previousSong (normal): queueIndex atual=${queueIndex}, prevIndex=${prevIndex}`,
-    );
-    if (prevIndex < 0) {
-      logWithTime(
-        `⏪ previousSong (normal): já no início da fila -> ignorando`,
-      );
-      return;
-    }
-    logWithTime(
-      `⏪ previousSong (normal): nova música: ${queue[prevIndex]?.title}`,
-    );
+    if (prevIndex < 0) return;
     set({
       queueIndex: prevIndex,
       currentSong: queue[prevIndex],
@@ -622,24 +572,13 @@ export const usePlayerStore = create((set, get) => ({
     const shuffled = shuffleArray(remaining).map((i) => queue[i]);
     const newQueue = [...past, current, ...shuffled];
 
-    logWithTime(
-      `🔀 shuffleRemaining: ${remaining.length} músicas embaralhadas a partir de queueIndex=${queueIndex}`,
-    );
-
-    set({
-      queue: newQueue,
-      shuffle: false,
-      shuffleQueue: [],
-      shufflePos: 0,
-    });
+    set({ queue: newQueue, shuffle: false, shuffleQueue: [], shufflePos: 0 });
   },
 
   // ────────── Rádio ──────────
   setRadio: (radio) => {
     const state = get();
-    if (state.isPlaying) {
-      state.setPlaying(false);
-    }
+    if (state.isPlaying) state.setPlaying(false);
     set({
       currentRadio: radio,
       playerType: "radio",
@@ -672,30 +611,26 @@ export const usePlayerStore = create((set, get) => ({
 
   playRadio: async (radio) => {
     const state = get();
-    if (state.isPlaying) {
-      set({ isPlaying: false });
-    }
+    if (state.isPlaying) set({ isPlaying: false });
 
     let audio = state._radioAudio;
     if (!audio) {
       audio = new Audio();
+      audio.crossOrigin = "anonymous"; // ← adicione isso
       audio.preload = "none";
-      audio.volume = state.volume; // Aplicar volume atual na criação
-      audio.addEventListener("play", () => {
-        set({ radioPlaying: true, radioBuffering: false });
-      });
-      audio.addEventListener("pause", () => {
-        set({ radioPlaying: false, radioBuffering: false });
-      });
-      audio.addEventListener("waiting", () => {
-        set({ radioBuffering: true });
-      });
-      audio.addEventListener("playing", () => {
-        set({ radioBuffering: false, radioPlaying: true });
-      });
-      audio.addEventListener("error", () => {
-        set({ radioPlaying: false, radioBuffering: false });
-      });
+      audio.addEventListener("play", () =>
+        set({ radioPlaying: true, radioBuffering: false }),
+      );
+      audio.addEventListener("pause", () =>
+        set({ radioPlaying: false, radioBuffering: false }),
+      );
+      audio.addEventListener("waiting", () => set({ radioBuffering: true }));
+      audio.addEventListener("playing", () =>
+        set({ radioBuffering: false, radioPlaying: true }),
+      );
+      audio.addEventListener("error", () =>
+        set({ radioPlaying: false, radioBuffering: false }),
+      );
       set({ _radioAudio: audio });
     }
 
@@ -716,19 +651,15 @@ export const usePlayerStore = create((set, get) => ({
     audio.pause();
     audio.src = "";
     audio.src = radio.stream;
-    audio.volume = state.volume; // Aplicar volume atual
-
-    set({
-      currentRadio: radio,
-      playerType: "radio",
-      radioBuffering: true,
-    });
+    audio.volume = state.volume;
+    set({ currentRadio: radio, playerType: "radio", radioBuffering: true });
 
     try {
       await audio.play();
+      console.log("audio.play ok");
     } catch (err) {
       if (err.name === "AbortError") return;
-      console.error(err);
+      console.error("audio.play error", err);
       set({ radioBuffering: false });
     }
   },
@@ -749,7 +680,6 @@ export const usePlayerStore = create((set, get) => ({
   _mediaRecorder: null,
   _recordingChunks: [],
 
-  // Nas ações:
   startRecording: () => {
     const state = get();
     const audioEl = state._radioAudio;
@@ -774,11 +704,12 @@ export const usePlayerStore = create((set, get) => ({
       const arrayBuffer = await blob.arrayBuffer();
       const radioName = get().currentRadio?.name ?? "radio";
       try {
-        const savedPath = await window.api.radio.saveRecording(
-          arrayBuffer,
+        // window.api.radio.saveRecording não existe no Capacitor — implemente conforme necessário
+        console.warn(
+          "saveRecording não implementado no Capacitor:",
           radioName,
+          arrayBuffer,
         );
-        console.log("✅ Gravação salva em:", savedPath);
       } catch (e) {
         console.error("❌ Erro ao salvar gravação:", e);
       }
@@ -797,6 +728,5 @@ export const usePlayerStore = create((set, get) => ({
     const { _mediaRecorder, isRecording } = get();
     if (!isRecording || !_mediaRecorder) return;
     _mediaRecorder.stop();
-    // isRecording vira false no onstop acima
   },
 }));

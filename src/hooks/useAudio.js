@@ -4,7 +4,13 @@ import { usePlayerStore } from "../store/playerStore";
 
 function logWithTime(...args) {
   const now = new Date();
-  const timestamp = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}.${now.getMilliseconds().toString().padStart(3, "0")}`;
+  const timestamp = `${now.getHours().toString().padStart(2, "0")}:${now
+    .getMinutes()
+    .toString()
+    .padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}.${now
+    .getMilliseconds()
+    .toString()
+    .padStart(3, "0")}`;
   console.log(`[${timestamp}]`, ...args);
 }
 
@@ -25,7 +31,7 @@ export function useAudio() {
   const volume = usePlayerStore((state) => state.volume);
   const nextSong = usePlayerStore((state) => state.nextSong);
   const restartSignal = usePlayerStore((state) => state.restartSignal);
-
+  const playerType = usePlayerStore((state) => state.playerType);
   const playerA = audioRef.current;
   const playerB = crossfadeAudioRef.current;
 
@@ -210,7 +216,13 @@ export function useAudio() {
     entering.volume = st.volume * alpha;
 
     logWithTime(
-      `🎚️ [VOLUMES] alpha=${alpha.toFixed(3)} | active.vol=${active.volume.toFixed(3)} | entering.vol=${entering.volume.toFixed(3)} | remaining=${remaining.toFixed(2)}s`,
+      `🎚️ [VOLUMES] alpha=${alpha.toFixed(
+        3,
+      )} | active.vol=${active.volume.toFixed(
+        3,
+      )} | entering.vol=${entering.volume.toFixed(
+        3,
+      )} | remaining=${remaining.toFixed(2)}s`,
     );
 
     if (alpha >= 0.99) {
@@ -246,6 +258,7 @@ export function useAudio() {
       const active = getActive();
       const dur = active.duration;
       const ct = active.currentTime;
+      if (usePlayerStore.getState().playerType === "radio") return;
 
       if (!dur || isNaN(dur) || dur <= 0) return;
 
@@ -275,7 +288,9 @@ export function useAudio() {
       if (dur <= st.fadeDuration) {
         if (fadingRef.current) {
           logWithTime(
-            `⛔ [CROSSFADE] duração (${dur.toFixed(2)}s) <= fadeDuration (${st.fadeDuration}s) – abortando`,
+            `⛔ [CROSSFADE] duração (${dur.toFixed(2)}s) <= fadeDuration (${
+              st.fadeDuration
+            }s) – abortando`,
           );
           abortCrossfade();
         }
@@ -302,7 +317,9 @@ export function useAudio() {
 
       if (!fadingRef.current) {
         logWithTime(
-          `⏱️ [TIME] iniciando crossfade: remaining=${remaining.toFixed(2)}s | fadeWindow=${fadeWindow}s`,
+          `⏱️ [TIME] iniciando crossfade: remaining=${remaining.toFixed(
+            2,
+          )}s | fadeWindow=${fadeWindow}s`,
         );
         const started = startCrossfade(next.src);
         if (!started) return;
@@ -335,6 +352,10 @@ export function useAudio() {
 
   // ---------- LOAD SONG ----------
   useEffect(() => {
+    if (playerType === "radio") {
+      return;
+    }
+
     if (crossfadeDoneRef.current) {
       logWithTime(
         `🎧 [LOAD] crossfadeDone ativo – reiniciando flag e ignorando load`,
@@ -380,7 +401,9 @@ export function useAudio() {
     active.src = currentSong.src;
     active.load();
     logWithTime(
-      `🎧 [LOAD] player ativo (${active === playerA ? "A" : "B"}) recebeu nova src`,
+      `🎧 [LOAD] player ativo (${
+        active === playerA ? "A" : "B"
+      }) recebeu nova src`,
     );
 
     active.addEventListener(
@@ -406,6 +429,10 @@ export function useAudio() {
 
   // ---------- PLAY / PAUSE ----------
   useEffect(() => {
+    if (playerType === "radio") {
+      return;
+    }
+
     if (!currentSong) {
       logWithTime(`🎧 [PLAY/PAUSE] sem currentSong – ignorando`);
       return;
@@ -432,7 +459,9 @@ export function useAudio() {
   // ---------- SEEK ----------
   function seek(percent) {
     logWithTime(
-      `🎧 [SEEK] percent=${percent} | currentTime antes=${getActive().currentTime}`,
+      `🎧 [SEEK] percent=${percent} | currentTime antes=${
+        getActive().currentTime
+      }`,
     );
     const active = getActive();
     if (!active.duration) {
@@ -463,7 +492,9 @@ export function useAudio() {
     const newVolume = usePlayerStore.getState().volume;
     active.volume = newVolume;
     logWithTime(
-      `🎧 [SEEK] novo currentTime=${newTime.toFixed(2)}s | volume restaurado para ${newVolume}`,
+      `🎧 [SEEK] novo currentTime=${newTime.toFixed(
+        2,
+      )}s | volume restaurado para ${newVolume}`,
     );
   }
 

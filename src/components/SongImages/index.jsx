@@ -7,14 +7,17 @@ import "swiper/css";
 
 export function SongQueueStack() {
   const currentSong = usePlayerStore((s) => s.currentSong);
-  const queue       = usePlayerStore((s) => s.queue);
-  const queueIndex  = usePlayerStore((s) => s.queueIndex);
-  const repeat      = usePlayerStore((s) => s.repeat);
-  const playSong    = usePlayerStore((s) => s.playSong);
+  const queue = usePlayerStore((s) => s.queue);
+  const queueIndex = usePlayerStore((s) => s.queueIndex);
+  const repeat = usePlayerStore((s) => s.repeat);
+  const playSong = usePlayerStore((s) => s.playSong);
+  const playerType = usePlayerStore((s) => s.playerType);
+  const currentRadio = usePlayerStore((s) => s.currentRadio);
+  const radioPlaying = usePlayerStore((s) => s.radioPlaying);
 
-  const queueKey     = queue.map((s) => s.id).join(",");
-  const swiperRef    = useRef(null);
-  const userSwiped   = useRef(false); // true quando foi o usuário que moveu
+  const queueKey = queue.map((s) => s.id).join(",");
+  const swiperRef = useRef(null);
+  const userSwiped = useRef(false); // true quando foi o usuário que moveu
   const initialSlide = repeat ? queue.length + queueIndex : queueIndex;
 
   const [activeSlide, setActiveSlide] = useState(initialSlide);
@@ -35,7 +38,7 @@ export function SongQueueStack() {
 
   const handleSlideChange = (swiper) => {
     const active = swiper.activeIndex;
-    const n      = queue.length;
+    const n = queue.length;
 
     setActiveSlide(active);
 
@@ -68,17 +71,57 @@ export function SongQueueStack() {
     }
   };
 
+  // Rádio tocando
+  if (playerType === "radio") {
+    return (
+      <div className={styles.stack}>
+        <div className={styles.empty}>
+          <svg
+            className={styles.emptyIcon}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3.75 19.5h16.5M3.75 6.75h16.5M3.75 13.5h16.5"
+            />
+          </svg>
+          <span className={styles.emptyTitle}>
+            {currentRadio?.name ?? "Rádio"}
+          </span>
+          <span className={styles.emptySubtitle}>
+            {radioPlaying ? "🔴 Ao vivo" : "Pausado"}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Sem música
   if (!currentSong || queue.length === 0) {
     return (
       <div className={styles.stack}>
         <div className={styles.empty}>
-          <svg className={styles.emptyIcon} viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="1.5">
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          <svg
+            className={styles.emptyIcon}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+            />
           </svg>
           <span className={styles.emptyTitle}>Nenhuma música tocando</span>
-          <span className={styles.emptySubtitle}>Escolha uma música para começar</span>
+          <span className={styles.emptySubtitle}>
+            Escolha uma música para começar
+          </span>
         </div>
       </div>
     );
@@ -104,8 +147,15 @@ export function SongQueueStack() {
         {slides.map((song, i) => {
           const isCurrent = i === activeSlide;
           return (
-            <SwiperSlide key={`${song.id}-${i}`} className={styles.slideWrapper}>
-              <div className={`${styles.card} ${isCurrent ? styles.current : styles.neighbor}`}>
+            <SwiperSlide
+              key={`${song.id}-${i}`}
+              className={styles.slideWrapper}
+            >
+              <div
+                className={`${styles.card} ${
+                  isCurrent ? styles.current : styles.neighbor
+                }`}
+              >
                 <span className={styles.title}>{song.title}</span>
                 {song.artist && (
                   <span className={styles.artist}>{song.artist}</span>

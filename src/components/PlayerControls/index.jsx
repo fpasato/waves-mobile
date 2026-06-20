@@ -4,9 +4,8 @@ import {
   FaPlay,
   FaPause,
   FaRandom,
-  FaVolumeUp,
-  FaVolumeMute,
 } from "react-icons/fa";
+import { MdOutlineMusicOff } from "react-icons/md";
 import { GiPreviousButton, GiNextButton } from "react-icons/gi";
 import { RiLoopLeftLine } from "react-icons/ri";
 import { MdFiberManualRecord, MdStop, MdSubtitles } from "react-icons/md";
@@ -49,6 +48,8 @@ export const PlayerControls = memo(function PlayerControls({
     // Volume
     volume,
     setVolume,
+    clearRadio, 
+    clearQueue,
   } = usePlayerStore();
 
   // ────────── Estado local do volume ──────────
@@ -117,21 +118,13 @@ export const PlayerControls = memo(function PlayerControls({
             {isRecording ? <MdStop /> : <MdFiberManualRecord />}
           </button>
           <button
-            className={`${styles.button} ${styles.outButton} ${
-              lyricsEnabled ? styles.lyricsActive : ""
-            }`}
-            onClick={onToggleLyrics}
-            disabled={isRadio}
-            style={{ opacity: isRadio ? 0.2 : lyricsEnabled ? 1 : 0.4 }}
+            className={`${styles.button} ${styles.outButton}`}
+            onClick={() => { clearQueue(); clearRadio(); }}
             title={
-              isRadio
-                ? "Indisponível para rádio"
-                : lyricsEnabled
-                ? "Desativar legenda"
-                : "Ativar legenda"
+              "Pare todas as músicas"
             }
           >
-            <MdSubtitles />
+            <MdOutlineMusicOff />
           </button>
         </div>
 

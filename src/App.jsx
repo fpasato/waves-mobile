@@ -9,7 +9,7 @@ import { RadioScreen } from "./screens/RadioScreen";
 import { RecentScreen } from "./screens/RecentsScreen";
 import { useAudio } from "./hooks/useAudio";
 import { usePlayerStore } from "./store/playerStore";
-import { useTheme } from "./hooks/useTheme"; 
+import { useTheme } from "./hooks/useTheme";
 import { App as CapacitorApp } from "@capacitor/app";
 
 import {
@@ -73,7 +73,9 @@ function PlayerApp() {
       "appStateChange",
       ({ isActive }) => {
         if (isActive) {
-          console.log("📱 App retomado — reregistrando MusicControls listeners");
+          console.log(
+            "📱 App retomado — reregistrando MusicControls listeners",
+          );
           setupMusicControlsListeners();
           const st = usePlayerStore.getState();
           if (st.currentSong) {
@@ -99,19 +101,23 @@ function PlayerApp() {
     store.loadPlaybackSettings().catch(() => {});
 
     // 3. Scan de disco — só roda se passou mais de SYNC_INTERVAL_MS
-    //    desde o último scan. Assim não escaneia a cada abertura do app.
     if (shouldSync()) {
-      console.log("🔍 Iniciando sincronização de novos arquivos...");
-      syncNewFilesFromDisk()
+      let reloadTimer = null;
+      const debouncedReload = () => {
+        clearTimeout(reloadTimer);
+        reloadTimer = setTimeout(() => {
+          if (!cancelled) store.reloadLibraryFromDatabase();
+        }, 3000); // recarrega 3s após a última atualização
+      };
+
+      syncNewFilesFromDisk(debouncedReload)
         .then(() => {
           markSynced();
-          if (!cancelled) store.reloadLibraryFromDatabase();
+          if (!cancelled) store.reloadLibraryFromDatabase(); // reload final
         })
         .catch((err) => {
           if (!cancelled) console.error("Erro na sincronização:", err);
         });
-    } else {
-      console.log("⏭️ Scan ignorado — biblioteca sincronizada recentemente.");
     }
 
     return () => {

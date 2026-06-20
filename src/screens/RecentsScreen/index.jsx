@@ -4,14 +4,21 @@ import { Button } from "../../components/Button";
 import { api } from "../../database/database"; // ajuste o caminho se necessário
 import styles from "./style.module.css";
 
+// Substitua sua função groupByDay e o timeBadge pelo código abaixo
+
+function parseDate(str) {
+  if (!str) return new Date(NaN);
+  return new Date(str.replace(" ", "T").replace(/Z?$/, "Z"));
+}
+
 function groupByDay(recents) {
   const groups = {};
   for (const song of recents) {
-    const date = new Date(song.played_at + "Z");
+    const date = parseDate(song.played_at);
     const key = date.toLocaleDateString("pt-BR", {
       weekday: "long",
       day: "2-digit",
-      month: "long"
+      month: "long",
     });
     if (!groups[key]) groups[key] = [];
     groups[key].push(song);
@@ -40,14 +47,9 @@ export function RecentScreen({ setScreen }) {
 
   return (
     <div className={styles.container}>
-      <Header title="Tocados Recentemente" />
+      <Header title="Recentes" />
 
       <div className={styles.topActions}>
-        <Button
-          title="Voltar"
-          onClick={() => setScreen("player")}
-          className={styles.actionButton}
-        />
         <Button
           title="Limpar registros"
           onClick={handleClear}
@@ -71,9 +73,9 @@ export function RecentScreen({ setScreen }) {
                     <div className={styles.timelineDot} />
                     <div className={styles.songCard}>
                       <div className={styles.timeBadge}>
-                        {new Date(song.played_at).toLocaleTimeString("pt-BR", {
+                        {parseDate(song.played_at).toLocaleTimeString("pt-BR", {
                           hour: "2-digit",
-                          minute: "2-digit"
+                          minute: "2-digit",
                         })}
                       </div>
                       <div className={styles.meta}>
@@ -88,6 +90,15 @@ export function RecentScreen({ setScreen }) {
           ))}
         </div>
       )}
+
+      <div className={styles.backButtonWrapper}>
+        <button
+          onClick={() => setScreen("player")}
+          className={`${styles.tab} ${styles.backButton}`}
+        >
+          Voltar
+        </button>
+      </div>
     </div>
   );
 }

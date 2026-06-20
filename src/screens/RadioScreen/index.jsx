@@ -298,12 +298,15 @@ export function RadioScreen({ setScreen }) {
               <span className={styles.badge}>{favorites.length}</span>
             )}
           </button>
-          <button
-            onClick={() => setScreen("player")}
-            className={`${styles.tab} ${styles.backButton}`}
-          >
-            Voltar
-          </button>
+
+          <div className={styles.backButtonWrapper}> 
+            <button
+              onClick={() => setScreen("player")}
+              className={`${styles.tab} ${styles.backButton}`}
+            >
+              Voltar
+            </button>
+          </div>
         </div>
 
         {activeTab === "search" && (

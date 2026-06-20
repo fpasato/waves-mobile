@@ -74,7 +74,7 @@ async function runMigrations() {
       CREATE TABLE IF NOT EXISTS recents (
         id       INTEGER PRIMARY KEY AUTOINCREMENT,
         song_id  INTEGER NOT NULL,
-        played_at TEXT DEFAULT (datetime('now'))
+        played_at TEXT DEFAULT (datetime('now', 'localtime'))
       );
 
       CREATE TABLE IF NOT EXISTS playlists (
@@ -320,18 +320,22 @@ export const api = {
     // ── Recents ──────────────────────────────────────────────────────────────
     recents: {
       async add(songId) {
-        // remove entrada antiga para evitar duplicatas
         await run("DELETE FROM recents WHERE song_id = ?", [songId]);
-        await run("INSERT INTO recents (song_id) VALUES (?)", [songId]);
+        await run(
+          "INSERT INTO recents (song_id, played_at) VALUES (?, datetime('now', 'localtime'))",
+          [songId],
+        );
       },
+
       async list(limit = 20) {
         return query(
           `
-            SELECT s.* FROM songs s
-            INNER JOIN recents r ON r.song_id = s.id
-            ORDER BY r.played_at DESC
-            LIMIT ?
-          `,
+      SELECT s.*, r.played_at
+      FROM songs s
+      INNER JOIN recents r ON r.song_id = s.id
+      ORDER BY r.played_at DESC
+      LIMIT ?
+    `,
           [limit],
         );
       },

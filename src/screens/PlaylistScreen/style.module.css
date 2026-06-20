@@ -1,77 +1,135 @@
-.playlistContainer {
+/* src/components/PlaylistScreen/style.module.css */
+
+/* ============================================================
+   Container principal
+   ============================================================ */
+.screenContainer {
   display: flex;
   flex-direction: column;
-  align-items: center;
   height: 100vh;
-  background-color: var(--background);
-}
-
-
-.toolbar {
-  display: flex;
-  justify-content: center;
-  padding: 0.4rem;
-
-  & svg{
-    width: 24px;
-    height: 24px;
-  }
-}
-
-.createBtn, .confirmBtn {
-  padding: 0.4rem;
-}
-
-.createForm {
-  display: flex;
-  justify-content: space-between;
-  width: 90%;
-
-  gap: 0.5rem;
-  padding: 0.4rem;
-}
-
-.input{
-  background-color: var(--background);
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--background);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
   color: var(--text);
-  border: 1px solid var(--accent);
-  border-radius: 4px;
-  padding: 0.5rem;
-  flex: 1;
-
-  &:focus {
-    outline: none;
-    border-color: var(--text);
-    filter: brightness(1.1);
-  }
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-
-.songList{
+/* ============================================================
+   Barra de estatísticas (usada no detalhe)
+   ============================================================ */
+.statsBar {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  width: 90%;
-  padding: 0.4rem;
-  border-radius: 0.6rem;
-  border: 1px solid var(--accent);
-
-  background-color: var(--background);
+  gap: 16px;
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.songItem{
+.statsGrid {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem;
-  border-radius: 4px;
-  background-color: var(--mid);
-  color: var(--text);
-  border: 1px solid var(--accent);
+  gap: 10px;
+}
 
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.statCard {
+  flex: 1;
+  background: var(--mid);
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background 0.2s ease;
+}
+
+.statCard:active {
+  background: var(--shadow);
+}
+
+.statCard h2 {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text);
+  opacity: 0.35;
+  margin: 0;
+}
+
+.statCard p {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+/* ============================================================
+   Toolbar (detalhe e lista)
+   ============================================================ */
+.toolbar,
+.detailToolbar {
+  display: flex;
+  gap: 10px;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================================
+   Lista de playlists / músicas
+   ============================================================ */
+.listContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 14px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.listContainer::-webkit-scrollbar {
+  width: 4px;
+}
+
+.listContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.listContainer::-webkit-scrollbar-thumb {
+  background: var(--shadow);
+  border-radius: 2px;
+}
+
+.songList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.songItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--mid);
+  border-radius: 8px;
+  border: 1px solid var(--shadow);
+  transition: background 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.songItem:active {
+  background: var(--shadow);
+  transform: scale(0.98);
 }
 
 .songInfo {
@@ -80,308 +138,284 @@
 }
 
 .songTitle {
-  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--text);
 }
 
-.playlistInfo{
+/* Playlist específico */
+.playlistInfo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-
+  gap: 12px;
   flex: 1;
+  min-width: 0;
 }
 
-.playlistDuration{
+.playlistIcon {
+  font-size: 1.4rem;
+  color: var(--accent2);
+}
+
+.playlistName {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playlistDuration {
   margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--text);
+  opacity: 0.6;
 }
 
-
-
-.screenContainer{
+/* Botões de ação */
+.songActions {
   display: flex;
-  flex-direction: column;
+  gap: 8px;
   align-items: center;
-  gap: 0.4rem;
-  height: 100vh;
-  background-color: var(--background);
 }
 
-
-.detailToolbar{
+.iconBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: var(--mid);
+  color: var(--text);
+  opacity: 0.7;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(4px);
+  position: relative;
+  overflow: hidden;
 }
 
-.iconBtn svg{
-  width: 24px;
-  height: 24px;
+.iconBtn:active {
+  transform: scale(0.88);
+  background: var(--shadow);
+  color: var(--text);
+  opacity: 1;
 }
 
+/* ============================================================
+   Criação de playlist
+   ============================================================ */
+.createForm {
+  display: flex;
+  gap: 8px;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
 
+.input {
+  flex: 1;
+  background: var(--mid);
+  border: 1px solid var(--shadow);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 0.9rem;
+  outline: none;
+}
 
+.input::placeholder {
+  color: var(--text);
+  opacity: 0.5;
+}
 
+.confirmBtn {
+  background: var(--accent2);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-
-
-
-
-.modalOverlay{
+/* ============================================================
+   Modal de adição
+   ============================================================ */
+.modalOverlay {
   position: fixed;
   inset: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 1rem;
-
-  background-color: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
-
-  z-index: 999;
-}
-
-.modal{
-  width: 100%;
-  max-width: 420px;
-
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  padding: 1rem;
-  border-radius: 0.8rem;
-
-  background-color: var(--background);
-  border: 1px solid var(--accent);
-
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-}
-
-.modalHeader{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.modalTitle{
-  font-size: 1rem;
-  font-weight: 600;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.modalClose{
-  display: flex;
-  align-items: center;
   justify-content: center;
-
-  width: 32px;
-  height: 32px;
-
-  border: none;
-  border-radius: 4px;
-
-  background-color: var(--mid);
-  color: white;
-
-  cursor: pointer;
-  transition: 0.2s;
+  align-items: flex-end;
+  z-index: 30;
 }
 
-.modalClose:hover{
-  filter: brightness(1.1);
-}
-
-.modalBody{
+.modal {
+  background: var(--background);
+  border-top: 1px solid var(--shadow);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 480px;
+  max-height: 70vh;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  padding: 20px 16px 30px;
+  color: var(--text);
+}
 
-  max-height: 50vh;
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modalTitle {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.modalBody {
+  flex: 1;
   overflow-y: auto;
 }
 
-.selectionActions{
+.selectionActions {
   display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-.selectionActions button{
-  flex: 1;
-
-  padding: 0.5rem;
-
-  border: 1px solid var(--accent);
-  border-radius: 4px;
-
-  background-color: var(--mid);
-  color: white;
-
+.selectionActions button {
+  background: var(--mid);
+  border: 1px solid var(--shadow);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.selectionActions button:hover{
-  filter: brightness(1.1);
-}
-
-.selectableList{
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
+.selectableList {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.selectableItem{
-  display: flex;
-  align-items: center;
-
-  padding: 0.6rem;
-  border-radius: 4px;
-
-  background-color: var(--mid);
-  border: 1px solid var(--accent);
+.selectableItem {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.selectableItem label{
+.selectableItem label {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-
-  width: 100%;
-
+  gap: 10px;
   cursor: pointer;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.selectableItem input{
-  min-width: 16px;
-  min-height: 16px;
-}
-
-.modalFooter{
+.modalFooter {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
+  gap: 10px;
+  margin-top: 16px;
 }
 
-.modalFooter button{
-  padding: 0.6rem 1rem;
-
-  border: 1px solid var(--accent);
-  border-radius: 4px;
-
-  background-color: var(--mid);
-  color: white;
-
+.modalFooter button {
+  background: var(--mid);
+  border: 1px solid var(--shadow);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.modalFooter button:hover{
-  filter: brightness(1.1);
-}
-
-.modalFooter button:disabled{
+.modalFooter button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-
-
-
-/* Estados vazio e carregando */
+/* ============================================================
+   Estados vazios / feedback
+   ============================================================ */
 .emptyState {
-  text-align: center;
-  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 56px 20px;
   color: var(--text);
-  opacity: 0.7;
+  opacity: 0.35;
   font-size: 0.9rem;
+  text-align: center;
 }
 
-/* Ícone da playlist */
-.playlistIcon {
+.feedback {
+  background: var(--accent2);
+  color: #fff;
+  padding: 8px 16px;
+  margin: 8px 18px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ============================================================
+   Botão Voltar fixo
+   ============================================================ */
+.backButtonWrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background: var(--background);
   display: flex;
   align-items: center;
-  color: var(--accent);
+  justify-content: center;
+  z-index: 19;
 }
 
-.playlistIcon svg {
-  width: 24px;
-  height: 24px;
-}
-
-/* Nome da playlist (com truncamento) */
-.playlistName {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Container de ações (botões, etc.) */
-.songActions {
-  display: flex;
-  gap: 0.5rem;
-  opacity: 0.6;
-  transition: opacity 0.2s;
-}
-
-.songItem:hover .songActions {
-  opacity: 1;
-}
-
-.playlistDuration {
-  opacity: 0.7;
-}
-
-
-/* Estatísticas da playlist */
-.statsBar {
+.backButton {
   width: 90%;
-  margin: 0.5rem 0;
+  padding: 14px 0;
+  background: var(--accent2);
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: background 0.2s, color 0.2s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.statsGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
+.backButton:hover {
+  background: var(--accent1);
+  color: #000;
 }
 
-.statCard {
-  background: var(--mid);
-  color: var(--text);
-  border: 1px solid var(--accent);
-  border-radius: 0.5rem;
-  padding: 0.4rem;
-  text-align: center;
-}
-
-.statCard h2 {
-  margin: 0 0 0.25rem 0;
-  font-size: 0.85rem;
-  font-weight: 400;
-  opacity: 0.7;
-}
-
-.statCard p {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 600;
+.backButton:active {
+  filter: brightness(0.9);
 }

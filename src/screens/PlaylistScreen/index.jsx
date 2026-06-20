@@ -3,9 +3,8 @@ import { usePlaylists, useSongs } from "../../hooks/useDatabase";
 import { usePlayerStore } from "../../store/playerStore";
 import { Header } from "../../components/Header";
 import { Button } from "../../components/Button";
-
 import styles from "./style.module.css";
-
+import { Capacitor } from "@capacitor/core";
 import { LuListPlus } from "react-icons/lu";
 import { MdLibraryMusic } from "react-icons/md";
 import { PiMusicNotesPlusBold } from "react-icons/pi";
@@ -22,6 +21,12 @@ const formatDuration = (seconds) => {
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
 };
 
+const toSrc = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  return Capacitor.convertFileSrc(path); 
+};
+
 export function PlaylistScreen({ setScreen }) {
   const {
     listPlaylists,
@@ -33,7 +38,6 @@ export function PlaylistScreen({ setScreen }) {
   } = usePlaylists();
   const { getAllSongs } = useSongs();
   const { playSong, setQueue } = usePlayerStore();
-  const isDetailOpen = usePlayerStore((state) => state.isPlaylistDetailOpen);
 
   // Estados da lista de playlists
   const [playlists, setPlaylists] = useState([]);
@@ -60,19 +64,20 @@ export function PlaylistScreen({ setScreen }) {
   const loadPlaylistsWithDuration = useCallback(async () => {
     setLoading(true);
     try {
-      const rawList = await listPlaylists(); // sem duração total
+      const rawList = await listPlaylists();
       if (!rawList || rawList.length === 0) {
         setPlaylists([]);
         return;
       }
-
-      // Enriquece cada playlist com sua duração total
       const enriched = await Promise.all(
         rawList.map(async (pl) => {
           const songs = await getPlaylistSongs(pl.id);
-          const total = songs.reduce((acc, s) => acc + (Number(s.duration) || 0), 0);
+          const total = songs.reduce(
+            (acc, s) => acc + (Number(s.duration) || 0),
+            0,
+          );
           return { ...pl, totalDuration: total };
-        })
+        }),
       );
       setPlaylists(enriched);
     } catch (err) {
@@ -82,7 +87,6 @@ export function PlaylistScreen({ setScreen }) {
     }
   }, [listPlaylists, getPlaylistSongs]);
 
-  // Carrega playlists apenas uma vez
   useEffect(() => {
     loadPlaylistsWithDuration();
   }, [loadPlaylistsWithDuration]);
@@ -102,7 +106,7 @@ export function PlaylistScreen({ setScreen }) {
         setDetailLoading(false);
       }
     },
-    [getPlaylistSongs]
+    [getPlaylistSongs],
   );
 
   const openPlaylist = useCallback(
@@ -110,10 +114,9 @@ export function PlaylistScreen({ setScreen }) {
       setSelectedPlaylist(playlist);
       setShowAddModal(false);
       setSelectedSongIds(new Set());
-      usePlayerStore.getState().setPlaylistDetailOpen(true);
       loadPlaylistSongsOnly(playlist.id);
     },
-    [loadPlaylistSongsOnly]
+    [loadPlaylistSongsOnly],
   );
 
   const closePlaylist = useCallback(() => {
@@ -121,15 +124,7 @@ export function PlaylistScreen({ setScreen }) {
     setPlaylistSongs([]);
     setAllSongs([]);
     setFeedback("");
-    usePlayerStore.getState().setPlaylistDetailOpen(false);
   }, []);
-
-  // Fecha o detalhe quando o estado global mandar (swipe ou botão voltar)
-  useEffect(() => {
-    if (!isDetailOpen && selectedPlaylist) {
-      closePlaylist();
-    }
-  }, [isDetailOpen, selectedPlaylist, closePlaylist]);
 
   // ------------------------------------------------------------
   // 3. Ações básicas (criar, remover playlist)
@@ -141,7 +136,7 @@ export function PlaylistScreen({ setScreen }) {
       await createPlaylist(name);
       setNewName("");
       setShowCreate(false);
-      await loadPlaylistsWithDuration(); // recarrega a lista
+      await loadPlaylistsWithDuration();
     } catch (err) {
       console.error(err);
     }
@@ -161,9 +156,9 @@ export function PlaylistScreen({ setScreen }) {
   // ------------------------------------------------------------
   const handlePlayAll = () => {
     if (!playlistSongs.length) return;
-    const mapped = playlistSongs.map((s) => ({ ...s, src: s.path }));
-    setQueue(mapped);
-    playSong(mapped[0], mapped);
+    const mapped = playlistSongs.map((s) => ({ ...s, src: toSrc(s.path) }));
+    playSong(mapped[0], mapped); 
+    setScreen("player"); 
   };
 
   const handleRemoveSong = async (songId) => {
@@ -218,9 +213,11 @@ export function PlaylistScreen({ setScreen }) {
 
   const playlistSongIds = useMemo(
     () => new Set(playlistSongs.map((s) => s.id)),
-    [playlistSongs]
+    [playlistSongs],
   );
-  const availableSongs = allSongs.filter((song) => !playlistSongIds.has(song.id));
+  const availableSongs = allSongs.filter(
+    (song) => !playlistSongIds.has(song.id),
+  );
 
   // ------------------------------------------------------------
   // Renderização: Detalhe da playlist
@@ -228,7 +225,7 @@ export function PlaylistScreen({ setScreen }) {
   if (selectedPlaylist) {
     const totalDuration = playlistSongs.reduce(
       (acc, s) => acc + (Number(s.duration) || 0),
-      0
+      0,
     );
 
     return (
@@ -313,7 +310,7 @@ export function PlaylistScreen({ setScreen }) {
                       <button
                         onClick={() =>
                           setSelectedSongIds(
-                            new Set(availableSongs.map((s) => s.id))
+                            new Set(availableSongs.map((s) => s.id)),
                           )
                         }
                       >
@@ -353,6 +350,19 @@ export function PlaylistScreen({ setScreen }) {
             </div>
           </div>
         )}
+
+        {/* Botão Voltar fixo */}
+        <div className={styles.backButtonWrapper}>
+          <button
+            onClick={() => {
+              closePlaylist();
+              setScreen("playlists");
+            }}
+            className={styles.backButton}
+          >
+            Voltar
+          </button>
+        </div>
       </div>
     );
   }
@@ -361,7 +371,7 @@ export function PlaylistScreen({ setScreen }) {
   // Renderização: Lista de playlists
   // ------------------------------------------------------------
   return (
-    <div className={styles.playlistContainer}>
+    <div className={styles.screenContainer}>
       <Header title="Playlists" />
 
       <div className={styles.toolbar}>
@@ -391,7 +401,7 @@ export function PlaylistScreen({ setScreen }) {
         </div>
       )}
 
-      <div className={styles.songList}>
+      <div className={styles.listContainer}>
         {loading ? (
           <div className={styles.emptyState}>Carregando...</div>
         ) : playlists.length === 0 ? (
@@ -427,6 +437,16 @@ export function PlaylistScreen({ setScreen }) {
             </div>
           ))
         )}
+      </div>
+
+      {/* Botão Voltar fixo */}
+      <div className={styles.backButtonWrapper}>
+        <button
+          onClick={() => setScreen("player")}
+          className={styles.backButton}
+        >
+          Voltar
+        </button>
       </div>
     </div>
   );

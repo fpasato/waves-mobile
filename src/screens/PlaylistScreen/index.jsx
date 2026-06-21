@@ -24,7 +24,7 @@ const formatDuration = (seconds) => {
 const toSrc = (path) => {
   if (!path) return null;
   if (path.startsWith("http")) return path;
-  return Capacitor.convertFileSrc(path); 
+  return Capacitor.convertFileSrc(path);
 };
 
 export function PlaylistScreen({ setScreen }) {
@@ -69,23 +69,19 @@ export function PlaylistScreen({ setScreen }) {
         setPlaylists([]);
         return;
       }
-      const enriched = await Promise.all(
-        rawList.map(async (pl) => {
-          const songs = await getPlaylistSongs(pl.id);
-          const total = songs.reduce(
-            (acc, s) => acc + (Number(s.duration) || 0),
-            0,
-          );
-          return { ...pl, totalDuration: total };
-        }),
-      );
+      
+      const enriched = rawList.map(pl => ({
+          ...pl,
+          totalDuration: pl.total_duration || 0
+      }));
+
       setPlaylists(enriched);
     } catch (err) {
       console.error("Erro ao carregar playlists:", err);
     } finally {
       setLoading(false);
     }
-  }, [listPlaylists, getPlaylistSongs]);
+  }, [listPlaylists]);
 
   useEffect(() => {
     loadPlaylistsWithDuration();
@@ -157,8 +153,8 @@ export function PlaylistScreen({ setScreen }) {
   const handlePlayAll = () => {
     if (!playlistSongs.length) return;
     const mapped = playlistSongs.map((s) => ({ ...s, src: toSrc(s.path) }));
-    playSong(mapped[0], mapped); 
-    setScreen("player"); 
+    playSong(mapped[0], mapped);
+    setScreen("player");
   };
 
   const handleRemoveSong = async (songId) => {
@@ -223,35 +219,36 @@ export function PlaylistScreen({ setScreen }) {
   // Renderização: Detalhe da playlist
   // ------------------------------------------------------------
   if (selectedPlaylist) {
-    const totalDuration = playlistSongs.reduce(
-      (acc, s) => acc + (Number(s.duration) || 0),
-      0,
-    );
+    // Usa a contagem real se as músicas já carregaram, senão usa o cache do selectedPlaylist
+    const isLoaded = !detailLoading && playlistSongs.length > 0;
+    
+    const totalDuration = isLoaded
+      ? playlistSongs.reduce((acc, s) => acc + (Number(s.duration) || 0), 0)
+      : (selectedPlaylist.totalDuration || 0);
+      
+    const songCount = isLoaded 
+      ? playlistSongs.length 
+      : (selectedPlaylist.song_count || 0);
 
     return (
       <div className={styles.screenContainer}>
         <Header title={selectedPlaylist.name} />
-
         <div className={styles.detailToolbar}>
-          <Button
-            className={styles.playAllBtn}
-            onClick={handlePlayAll}
-            title={<FaPlay />}
-          />
-          <Button
-            className={styles.addSongsBtn}
-            onClick={openAddModal}
-            title={<PiMusicNotesPlusBold />}
-          />
+          <button className={styles.iconBtnWithLabel} onClick={handlePlayAll}>
+            <FaPlay />
+            <span className={styles.iconLabel}>Tocar</span>
+          </button>
+          <button className={styles.iconBtnWithLabel} onClick={openAddModal}>
+            <PiMusicNotesPlusBold />
+            <span className={styles.iconLabel}>Adicionar</span>
+          </button>
         </div>
-
         {feedback && <div className={styles.feedback}>{feedback}</div>}
-
         <div className={styles.statsBar}>
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
               <h2>Total de Músicas:</h2>
-              <p>{playlistSongs.length}</p>
+              <p>{songCount}</p>
             </div>
             <div className={styles.statCard}>
               <h2>Duração total:</h2>
@@ -259,7 +256,6 @@ export function PlaylistScreen({ setScreen }) {
             </div>
           </div>
         </div>
-
         {detailLoading ? (
           <div className={styles.emptyState}>Carregando músicas...</div>
         ) : playlistSongs.length === 0 ? (
@@ -282,7 +278,6 @@ export function PlaylistScreen({ setScreen }) {
             ))}
           </div>
         )}
-
         {/* Modal de adição */}
         {showAddModal && (
           <div
@@ -350,7 +345,6 @@ export function PlaylistScreen({ setScreen }) {
             </div>
           </div>
         )}
-
         {/* Botão Voltar fixo */}
         <div className={styles.backButtonWrapper}>
           <button
@@ -375,11 +369,15 @@ export function PlaylistScreen({ setScreen }) {
       <Header title="Playlists" />
 
       <div className={styles.toolbar}>
-        <Button
-          className={styles.createBtn}
+        <button
+          className={styles.iconBtnWithLabel}
           onClick={() => setShowCreate((v) => !v)}
-          title={showCreate ? "Cancelar" : <LuListPlus />}
-        />
+        >
+          <LuListPlus />
+          <span className={styles.iconLabel}>
+            {showCreate ? "Cancelar" : "Nova playlist"}
+          </span>
+        </button>
       </div>
 
       {showCreate && (
@@ -396,7 +394,7 @@ export function PlaylistScreen({ setScreen }) {
           <Button
             className={styles.confirmBtn}
             onClick={handleCreate}
-            title="Criar Playlist"
+            title="Criar "
           />
         </div>
       )}

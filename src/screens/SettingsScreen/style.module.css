@@ -15,7 +15,7 @@
   display: flex;
   flex-direction: column;
   height: 91vh;
-  overflow: hidden; /* evita scroll duplo */
+  overflow-y: auto; /*  scroll vertical */
 }
 
 /* Navegação de abas */

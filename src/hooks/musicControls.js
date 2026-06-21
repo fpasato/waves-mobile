@@ -33,11 +33,29 @@ export async function setupMusicControlsListeners() {
 
       const store = usePlayerStore.getState();
       switch (info.message) {
-        case 'music-controls-next':      store.nextSong();        break;
-        case 'music-controls-previous':  store.previousSong();    break;
-        case 'music-controls-play':      store.setPlaying(true);  break;
-        case 'music-controls-pause':     store.setPlaying(false); break;
+        case 'music-controls-next':      if (store.playerType !== "radio") store.nextSong();        break;
+        case 'music-controls-previous':  if (store.playerType !== "radio") store.previousSong();    break;
+        case 'music-controls-play':
+          if (store.playerType === "radio") store.playRadio(store.currentRadio);
+          else store.setPlaying(true);
+          break;
+        case 'music-controls-pause':
+          if (store.playerType === "radio") store.pauseRadio();
+          else store.setPlaying(false);
+          break;
         case 'music-controls-destroy':   destroyMusicControls();  break;
+        case 'music-controls-seek-to':
+          if (info.position !== undefined && store.playerType !== "radio") {
+            const storeState = usePlayerStore.getState();
+            if (storeState.duration) {
+              const percent = (info.position / storeState.duration) * 100;
+              if (storeState.seekSignal !== undefined) {
+                // If there's a seek method available on the store or audio hook
+                usePlayerStore.setState({ seekTarget: info.position, seekSignal: storeState.seekSignal + 1 });
+              }
+            }
+          }
+          break;
       }
     }
   );
@@ -75,22 +93,31 @@ export async function updateMusicControls(song, isPlaying, elapsed) {
   }
 
   try {
+    const storeState = usePlayerStore.getState();
+    const songDuration = storeState.duration || song.duration || 0;
+
     const songChanged = song.id !== lastSongId;
 
     if (songChanged) {
+      if (!song.isRadio && songDuration === 0) {
+        console.log("🎵 Aguardando duração para criar MusicControls...");
+        return; // Espera a duração estar disponível
+      }
+
       await CapacitorMusicControls.create({
         track: song.title || 'Desconhecido',
         artist: song.artist || 'Artista desconhecido',
         album: song.album || '',
-        cover: song.artwork || 'www/assets/images/bg5.png',
+        cover: song.artwork || '',
         isPlaying,
         dismissable: false,
-        hasPrev: true,
-        hasNext: true,
-        hasClose: false,
-        notificationIcon: 'ic_media_play',
-        duration: song.duration || 0,
-        elapsed: elapsed || 0,
+        hasPrev: !song.isRadio,
+        hasNext: !song.isRadio,
+        hasClose: true,
+        hasScrubbing: !song.isRadio,
+        notificationIcon: 'ic_launcher',
+        duration: songDuration,
+        elapsed: elapsed || storeState.currentTime || 0,
         hasSkipForward: false,
         hasSkipBackward: false,
       });
@@ -98,6 +125,7 @@ export async function updateMusicControls(song, isPlaying, elapsed) {
       lastSongId = song.id;
     } else {
       await CapacitorMusicControls.updateIsPlaying({ isPlaying });
+      await updateMusicControlsElapsed(elapsed || storeState.currentTime || 0);
     }
   } catch (err) {
     console.error('MusicControls error:', err);

@@ -1,5 +1,7 @@
 {
-  "name": "ionic-app-base",
+  "appId": "com.waves.app",
+  "appName": "Waves",
+  "webDir": "dist",
   "integrations": {},
   "type": "react-vite"
 }

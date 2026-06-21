@@ -1,7 +1,12 @@
 import styles from "./style.module.css";
 import { usePlayer } from "../../store/PlayerContext";
-import { useRef, useState, useEffect, useCallback } from "react";
-import { useAnalyser } from "../../hooks/useAnalyser";
+import {
+  useRef,
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 
 export function ProgressBar() {
   const { audioRef, crossfadeAudioRef, analyserRef, activeAudioRef, seekRef } =
@@ -15,23 +20,20 @@ export function ProgressBar() {
   const displayPercentRef = useRef(0);
 
   // ── CACHE DAS CORES DO ACCENT (duas cores) ──
-  const accentCacheRef = useRef({ accent1: "", accent2: "" });
+  const accentCacheRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const update = () => {
-      const style = getComputedStyle(document.body);
+      if (!canvasRef.current) return;
+      const style = getComputedStyle(canvasRef.current);
       accentCacheRef.current = {
         accent1: style.getPropertyValue("--accent1").trim() || "#FFDFB9",
         accent2: style.getPropertyValue("--accent2").trim() || "#A4193D",
       };
     };
     update();
-    const observer = new MutationObserver(update);
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ["class", "style"],
-    });
-    return () => observer.disconnect();
+    window.addEventListener("tema-mudou", update);
+    return () => window.removeEventListener("tema-mudou", update);
   }, []);
 
   // ── PERCENTUAL ATUAL (para barra e canvas) ──
@@ -70,7 +72,7 @@ export function ProgressBar() {
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
-    const totalBars = 90;
+    const totalBars = 70;
     const half = totalBars / 2;
     const maxIndex = 70;
     const smoothedHeights = new Float32Array(totalBars);
@@ -146,7 +148,7 @@ export function ProgressBar() {
           smoothedHeights[i] * smoothing + targetHeight * (1 - smoothing);
 
         const isPlayed = (i / totalBars) * 100 < currentPercent;
-        ctx.globalAlpha = isPlayed ? 0.9 : 0.2;
+        // ctx.globalAlpha = isPlayed ? 0.9 : 0.2;
         ctx.fillStyle = gradient;
 
         const xPos = i * barWidth + (barWidth - actualBarWidth) / 2;

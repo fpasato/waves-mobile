@@ -4,6 +4,12 @@ import { useRadio } from "../../hooks/useRadio";
 import { useState } from "react";
 import { usePlayerStore } from "../../store/playerStore";
 
+import { MdOutlineFavorite } from "react-icons/md";
+import { MdOutlineFavoriteBorder } from "react-icons/md";
+import { LuPause } from "react-icons/lu";
+import { LuPlay } from "react-icons/lu";
+
+
 function WaveIcon() {
   return (
     <span className={styles.waveIcon} aria-hidden="true">
@@ -115,7 +121,7 @@ function RadioCard({
           aria-label={isActive ? "Pausar rádio" : "Tocar rádio"}
           title={isActive ? "Pausar" : "Tocar"}
         >
-          {isBuffering ? <Spinner /> : isActive ? "⏸" : "▶"}
+          {isBuffering ? <Spinner /> : isActive ? <LuPause /> : <LuPlay />}
         </button>
 
         <button
@@ -130,7 +136,7 @@ function RadioCard({
           }
           title={isFavorite ? "Remover favorito" : "Favoritar"}
         >
-          {isFavorite ? "♥" : "♡"}
+          {isFavorite ? <MdOutlineFavorite /> : <MdOutlineFavoriteBorder />}
         </button>
       </div>
     </article>

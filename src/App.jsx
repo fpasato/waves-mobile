@@ -11,13 +11,15 @@ import { useAudio } from "./hooks/useAudio";
 import { usePlayerStore } from "./store/playerStore";
 import { useTheme } from "./hooks/useTheme";
 import { App as CapacitorApp } from "@capacitor/app";
-
+import {
+  syncNewFilesFromDisk,
+  requestStoragePermission,
+  requestNotificationPermission,
+} from "./lib/syncLibrary";
 import {
   setupMusicControlsListeners,
   updateMusicControls,
 } from "./hooks/musicControls";
-
-import { syncNewFilesFromDisk } from "./lib/syncLibrary";
 
 // ─── Throttle do scan ────────────────────────────────────────────────────────
 
@@ -33,6 +35,51 @@ function shouldSync() {
 
 function markSynced() {
   localStorage.setItem(SYNC_TIMESTAMP_KEY, String(Date.now()));
+}
+
+// ─── Inicialização ───────────────────────────────────────────────────────────
+
+async function requestAllPermissions() {
+  const audioGranted = await requestStoragePermission();
+  if (!audioGranted) {
+    console.warn("⚠️ Permissão de áudio negada");
+  }
+
+  const notifGranted = await requestNotificationPermission();
+  if (!notifGranted) {
+    console.warn("⚠️ Permissão de notificação negada");
+  }
+
+  return audioGranted;
+}
+
+function loadLibraryAndSettings(store, cancelledRef) {
+  store.reloadLibraryFromDatabase().catch((err) => {
+    if (!cancelledRef.current) console.error("Erro ao carregar biblioteca:", err);
+  });
+
+  store.loadPlaybackSettings().catch(() => {});
+}
+
+function runDiskSync(store, cancelledRef) {
+  if (!shouldSync()) return;
+
+  let reloadTimer = null;
+  const debouncedReload = () => {
+    clearTimeout(reloadTimer);
+    reloadTimer = setTimeout(() => {
+      if (!cancelledRef.current) store.reloadLibraryFromDatabase();
+    }, 3000);
+  };
+
+  syncNewFilesFromDisk(debouncedReload)
+    .then(() => {
+      markSynced();
+      if (!cancelledRef.current) store.reloadLibraryFromDatabase();
+    })
+    .catch((err) => {
+      if (!cancelledRef.current) console.error("Erro na sincronização:", err);
+    });
 }
 
 // ─── App ─────────────────────────────────────────────────────────────────────
@@ -67,61 +114,70 @@ function PlayerApp() {
 
   useSwipeNavigation(goBack, 80);
 
+  const currentSong = usePlayerStore((s) => s.currentSong);
+  const isPlaying = usePlayerStore((s) => s.isPlaying);
+  const playerType = usePlayerStore((s) => s.playerType);
+  const currentRadio = usePlayerStore((s) => s.currentRadio);
+  const radioPlaying = usePlayerStore((s) => s.radioPlaying);
+  const duration = usePlayerStore((s) => s.duration);
+
+  // Atualiza os controles nativos quando a música, rádio ou estado de play/pause muda
+  useEffect(() => {
+    if (playerType === "music" && currentSong) {
+      const { currentTime } = usePlayerStore.getState();
+      updateMusicControls(currentSong, isPlaying, currentTime);
+    } else if (playerType === "radio" && currentRadio) {
+      updateMusicControls(
+        {
+          id: currentRadio.id,
+          title: currentRadio.name,
+          artist: "Rádio ao vivo",
+          isRadio: true,
+          artwork: currentRadio.favicon || "",
+        },
+        radioPlaying,
+        0
+      );
+    }
+  }, [currentSong, isPlaying, playerType, currentRadio, radioPlaying, duration]);
+
+
   // Reregistra MusicControls ao retomar o app
   useEffect(() => {
     const appStateListener = CapacitorApp.addListener(
       "appStateChange",
       ({ isActive }) => {
-        if (isActive) {
-          console.log(
-            "📱 App retomado — reregistrando MusicControls listeners",
-          );
-          setupMusicControlsListeners();
-          const st = usePlayerStore.getState();
-          if (st.currentSong) {
-            updateMusicControls(st.currentSong, st.isPlaying, st.currentTime);
-          }
+        if (!isActive) return;
+
+        console.log("📱 App retomado — reregistrando MusicControls listeners");
+        setupMusicControlsListeners();
+
+        const st = usePlayerStore.getState();
+        if (st.currentSong) {
+          updateMusicControls(st.currentSong, st.isPlaying, st.currentTime);
         }
       },
     );
     return () => appStateListener.remove();
   }, []);
 
-  // Inicialização
+  // Inicialização do app
   useEffect(() => {
-    let cancelled = false;
+    const cancelledRef = { current: false };
     const store = usePlayerStore.getState();
 
-    // 1. Biblioteca do banco — sempre, é rápido (sem I/O de disco)
-    store.reloadLibraryFromDatabase().catch((err) => {
-      if (!cancelled) console.error("Erro ao carregar biblioteca:", err);
-    });
+    async function init() {
+      const audioGranted = await requestAllPermissions();
+      if (!audioGranted) return;
 
-    // 2. Configurações de playback
-    store.loadPlaybackSettings().catch(() => {});
-
-    // 3. Scan de disco — só roda se passou mais de SYNC_INTERVAL_MS
-    if (shouldSync()) {
-      let reloadTimer = null;
-      const debouncedReload = () => {
-        clearTimeout(reloadTimer);
-        reloadTimer = setTimeout(() => {
-          if (!cancelled) store.reloadLibraryFromDatabase();
-        }, 3000); // recarrega 3s após a última atualização
-      };
-
-      syncNewFilesFromDisk(debouncedReload)
-        .then(() => {
-          markSynced();
-          if (!cancelled) store.reloadLibraryFromDatabase(); // reload final
-        })
-        .catch((err) => {
-          if (!cancelled) console.error("Erro na sincronização:", err);
-        });
+      loadLibraryAndSettings(store, cancelledRef);
+      runDiskSync(store, cancelledRef);
     }
 
+    init();
+
     return () => {
-      cancelled = true;
+      cancelledRef.current = true;
     };
   }, []);
 

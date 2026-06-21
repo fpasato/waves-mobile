@@ -13,6 +13,7 @@
   background: var(--background, #151515);
   color: var(--text, #ffffff);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  overflow-y: auto;
 }
 
 /* Card principal */
@@ -190,6 +191,8 @@
   color: var(--text);
   opacity: 0.9;
   word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
   animation: fadeIn 0.2s ease;
 }
 

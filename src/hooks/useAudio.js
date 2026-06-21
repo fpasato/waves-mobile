@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { usePlayer } from "../store/PlayerContext";
 import { usePlayerStore } from "../store/playerStore";
+import { updateMusicControlsElapsed } from "./musicControls";
 
 function logWithTime(...args) {
   const now = new Date();
@@ -266,6 +267,12 @@ export function useAudio() {
       st.setCurrentTime(ct);
       if (Math.abs(st.duration - dur) > 0.1) st.setDuration(dur);
 
+      const ctInt = Math.floor(ct);
+      if (active.lastInt !== ctInt) {
+        active.lastInt = ctInt;
+        updateMusicControlsElapsed(ct);
+      }
+
       if (crossfadeBlockedRef.current) {
         if (!fadingRef.current) active.volume = st.volume;
         return;
@@ -491,6 +498,7 @@ export function useAudio() {
     active.currentTime = newTime;
     const newVolume = usePlayerStore.getState().volume;
     active.volume = newVolume;
+    updateMusicControlsElapsed(newTime);
     logWithTime(
       `🎧 [SEEK] novo currentTime=${newTime.toFixed(
         2,
@@ -529,6 +537,7 @@ export function useAudio() {
 
     active.currentTime = seekTarget;
     active.volume = usePlayerStore.getState().volume;
+    updateMusicControlsElapsed(seekTarget);
     logWithTime(`⏩ [SEEK_SIGNAL] seekTarget=${seekTarget}s`);
   }, [seekSignal]);
 

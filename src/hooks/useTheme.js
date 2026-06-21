@@ -11,7 +11,7 @@ export const TEMAS = [
   // Combinações variadas
   { accent1: "#00E5FF", accent2: "#7B2FF7" }, // ciano & violeta
   { accent1: "#FF4D6D", accent2: "#00C896" }, // coral & jade
-  { accent1: "#FF006E", accent2: "#8338EC" }, // pink & púrpura
+  { accent1: "#FFDFB9", accent2: "#A4193D" }, // pink & púrpura
   { accent1: "#06D6A0", accent2: "#FFD60A" }, // menta & amarelo
   { accent1: "#00B4D8", accent2: "#FF5400" }, // oceano & laranja queimado
   { accent1: "#8AC926", accent2: "#6A00F4" }, // lima & roxo
@@ -51,6 +51,7 @@ export function useTheme() {
     aplicarCSSVariaveis(TEMAS[index]);
     setTemaAtivo(index);
     localStorage.setItem(STORAGE_KEY, String(index));
+    window.dispatchEvent(new CustomEvent("tema-mudou"));
   }
 
   return { temaAtivo, mudarTema, temas: TEMAS };

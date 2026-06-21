@@ -2,7 +2,10 @@ import { Filesystem, Directory } from "@capacitor/filesystem";
 import { Capacitor } from "@capacitor/core";
 import { parseBlob } from "music-metadata-browser";
 import { api } from "../database/database";
+import { getNativeMetadata } from "./mediaMetadata";
+import { registerPlugin } from "@capacitor/core";
 
+const MediaMetadata = registerPlugin("MediaMetadata");
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
 const AUDIO_EXTENSIONS = [
@@ -136,24 +139,24 @@ async function extractMetadata(relativePath) {
  * persiste no banco. Retorna null se a faixa for muito curta.
  */
 async function enrichTrack(track) {
-  const relativePath = decodeURIComponent(
-    track.path.replace("file:///storage/emulated/0/", ""),
-  );
+  const metadata = await getNativeMetadata(track.path);
 
-  const metadata = await extractMetadata(relativePath);
+  if (metadata.duration > 0 && metadata.duration < MIN_DURATION_SECONDS) {
+    await api.db.songs.delete(track.id);
+    console.log(`🗑️ Removido: ${track.title} (${metadata.duration}s)`);
+    return null;
+  }
 
-  // Não filtra por duração aqui — blob parcial não é confiável para isso
-  // Apenas atualiza o que conseguiu extrair
   const enriched = {
     id: track.id,
-    title: metadata.title,
-    artist: metadata.artist,
+    title: metadata.title || track.title,
+    artist: metadata.artist || track.artist,
     duration: metadata.duration,
     file_mtime: track.file_mtime,
   };
 
   await api.db.songs.update(enriched);
-  console.log(`✅ Enriquecido: ${metadata.title} (${metadata.duration}s)`);
+  console.log(`✅ ${enriched.title} (${enriched.duration}s)`);
   return enriched;
 }
 
@@ -217,8 +220,6 @@ export async function startBackgroundEnrichment(onTrackEnriched, signal) {
 
       const enriched = await enrichTrack(track);
       if (enriched) onTrackEnriched?.(enriched);
-
-      await new Promise((r) => setTimeout(r, 2000)); // era 80ms, agora 2s entre cada
       return enriched;
     });
 
@@ -291,6 +292,18 @@ export async function scanFolder(folderPath) {
     originalPath: file.originalPath,
     file_mtime: file.mtime,
   }));
+}
+
+export async function scanAllMusic() {
+  console.log("📂 scanAllMusic via MediaStore");
+  try {
+    const result = await MediaMetadata.getAllAudioFiles();
+    console.log(`🎵 ${result.tracks.length} arquivos encontrados via MediaStore.`);
+    return result.tracks;
+  } catch (err) {
+    console.error("Erro no scan via MediaStore", err);
+    throw err;
+  }
 }
 
 // ─── Mapeamento para o banco ─────────────────────────────────────────────────
@@ -368,12 +381,40 @@ export async function syncNewFilesFromDisk(onTrackEnriched) {
 }
 
 // ─── Permissões ──────────────────────────────────────────────────────────────
-
 export async function requestStoragePermission() {
+  if (!Capacitor.isNativePlatform()) return true;
+
   try {
-    const result = await Filesystem.requestPermissions();
-    return result.publicStorage === "granted";
-  } catch {
+    const result = await MediaMetadata.requestAudioPermission();
+    console.log("🎵 permissão:", result.granted, "permanente:", result.permanentlyDenied);
+
+    if (!result.granted && result.permanentlyDenied) {
+      // negado permanentemente: não adianta pedir de novo, manda pras configurações
+      await MediaMetadata.openAppSettings();
+    }
+
+    return result.granted;
+  } catch (e) {
+    console.error("Erro permissão:", e);
+    return false;
+  }
+}
+
+export async function requestNotificationPermission() {
+  if (!Capacitor.isNativePlatform()) return true;
+
+  try {
+    const result = await MediaMetadata.requestNotificationPermission();
+    console.log("🔔 permissão notificação:", result.granted, "permanente:", result.permanentlyDenied);
+
+    if (!result.granted && result.permanentlyDenied) {
+      // negado permanentemente: não adianta pedir de novo, manda pras configurações
+      await MediaMetadata.openAppSettings();
+    }
+
+    return result.granted;
+  } catch (e) {
+    console.error("Erro permissão notificação:", e);
     return false;
   }
 }

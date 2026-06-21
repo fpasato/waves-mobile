@@ -54,31 +54,29 @@
 /* Área de timeline – ocupa o espaço restante e recebe scroll */
 .timeline {
   flex: 1;
-  overflow-y: auto;
   padding: 16px 16px 24px;
   scroll-behavior: smooth;
+  overflow-y: auto;
 }
 
 /* Grupo de um dia */
 .dayGroup {
   margin-bottom: 32px;
+  background-color: var(--background);
 }
 
-/* Cabeçalho do dia (sticky para manter visível durante a rolagem) */
 .dayHeader {
-  display: flex;
+  display: flex;        
   align-items: center;
   gap: 10px;
-  margin-bottom: 16px;
-  width: 100%;
   position: sticky;
   top: 0;
-  background: var(--background); /* cobre o conteúdo ao rolar */
-  z-index: 2;
+  background: var(--background);
+  z-index: 10;
   padding: 8px 0;
+  box-shadow: 0 4px 12px 4px var(--background);
 }
 
-/* Bolinha colorida do dia */
 .dayDot {
   width: 12px;
   height: 12px;
@@ -129,7 +127,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 2px 8px var(--shadow);
+  border: 1px solid var(--shadow);
 }
 
 /* Badge de horário */

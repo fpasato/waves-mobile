@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Mousewheel } from "swiper/modules";
+import { Mousewheel, FreeMode } from "swiper/modules";
 import { usePlayerStore } from "../../store/playerStore";
 import styles from "./style.module.css";
 import "swiper/css";
@@ -71,6 +71,16 @@ export function SongQueueStack() {
     }
   };
 
+  // Calcula opacidade/escala com base na distância do slide ativo
+  const getDepthStyle = (distance) => {
+    const clamped = Math.min(distance, 3);
+    const opacity = [1, 0.6, 0.35, 0.15][clamped];
+    const scale = [1, 0.92, 0.85, 0.78][clamped];
+    // Aplica will-change apenas nos cards muito próximos à tela para não explodir a memória RAM/GPU do celular
+    const willChange = distance <= 3 ? "transform, opacity" : "auto";
+    return { opacity, transform: `scale(${scale})`, willChange };
+  };
+
   // Rádio tocando
   if (playerType === "radio") {
     return (
@@ -137,15 +147,23 @@ export function SongQueueStack() {
         }}
         direction="vertical"
         centeredSlides={true}
-        slidesPerView={3}
+        slidesPerView={5}
         initialSlide={initialSlide}
         mousewheel={{ sensitivity: 1, forceToAxis: true }}
-        modules={[Mousewheel]}
+        modules={[Mousewheel, FreeMode]}
+        freeMode={{
+          enabled: true,
+          sticky: true,
+          momentumRatio: 0.65,
+          momentumVelocityRatio: 0.65,
+        }}
         className={styles.track}
         onSlideChange={handleSlideChange}
       >
         {slides.map((song, i) => {
           const isCurrent = i === activeSlide;
+          const distance = Math.abs(i - activeSlide);
+
           return (
             <SwiperSlide
               key={`${song.id}-${i}`}
@@ -155,6 +173,7 @@ export function SongQueueStack() {
                 className={`${styles.card} ${
                   isCurrent ? styles.current : styles.neighbor
                 }`}
+                style={getDepthStyle(distance)}
               >
                 <span className={styles.title}>{song.title}</span>
                 {song.artist && (

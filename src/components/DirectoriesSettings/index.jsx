@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { usePlayerStore } from "../../store/playerStore";
 import { useSongs } from "../../hooks/useDatabase";
 import {
-  scanFolder,
+  scanAllMusic,
   mapTracksForDb,
   requestStoragePermission,
   startBackgroundEnrichment,
@@ -51,9 +51,9 @@ export function DirectoriesSettings() {
         return;
       }
 
-      // 2. Scan dos arquivos
+      // 2. Scan dos arquivos (MediaStore Nativo)
       setStatus("Escaneando dispositivo...");
-      const tracks = await scanFolder("");
+      const tracks = await scanAllMusic();
       if (signal.aborted) return;
 
       if (tracks.length === 0) {
@@ -61,11 +61,18 @@ export function DirectoriesSettings() {
         return;
       }
 
+      const filteredTracks = tracks.filter((track) => {
+        if (minDuration > 0 && track.duration > 0 && track.duration < minDuration) {
+          return false;
+        }
+        return true;
+      });
+
       // 3. Salvar no banco
-      setStatus(`Salvando ${tracks.length} músicas...`);
-      await upsertManySongs(mapTracksForDb(tracks, null));
+      setStatus(`Salvando ${filteredTracks.length} músicas...`);
+      await upsertManySongs(mapTracksForDb(filteredTracks, null));
       await reloadLibraryFromDatabase();
-      setStatus(`${tracks.length} músicas encontradas. Enriquechendo...`);
+      setStatus(`${filteredTracks.length} músicas encontradas. Enriquecendo...`);
 
       // handleScanDevice - substitui os passos 4 e 5
 
@@ -98,7 +105,7 @@ export function DirectoriesSettings() {
         setStatus("Operação cancelada.");
       } else {
         console.error(err);
-        setStatus("Erro ao escanear dispositivo");
+        setStatus("Erro nativo: " + (err.message || err));
       }
     } finally {
       if (abortRef.current === controller) {
@@ -119,6 +126,8 @@ export function DirectoriesSettings() {
           </p>
         </div>
 
+        {status && <div className={styles.status}>{status}</div>}
+        
         <div className={styles.scanSettingsSection}>
           <div className={styles.optionTitle}>
             <strong>Duração mínima do áudio</strong>
@@ -143,7 +152,7 @@ export function DirectoriesSettings() {
 
         <div className={styles.actions}>
           <Button
-            title={scanning ? "Escaneando..." : "Escanear dispositivo"}
+            title={scanning ? "Escaneando..." : "Escanear dispositivo (v2)"}
             onClick={handleScanDevice}
             disabled={scanning}
           />
@@ -155,7 +164,6 @@ export function DirectoriesSettings() {
           />
         </div>
 
-        {status && <div className={styles.status}>{status}</div>}
       </div>
     </div>
   );

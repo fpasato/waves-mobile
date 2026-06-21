@@ -8,8 +8,9 @@
  */
 
 import { CapacitorSQLite, SQLiteConnection } from "@capacitor-community/sqlite";
+import { Capacitor } from "@capacitor/core";
 
-const sqliteConnection = new SQLiteConnection(CapacitorSQLite);
+let sqliteConnection = null;
 let db = null;
 
 // ---------------------------------------------------------------------------
@@ -19,6 +20,16 @@ export async function initDatabase() {
   if (db) return db;
 
   try {
+    if (!sqliteConnection) {
+      // Usa o CapacitorSQLite exportado, ou fallback para Capacitor.Plugins
+      const plugin = CapacitorSQLite || Capacitor.Plugins?.CapacitorSQLite;
+      if (!plugin) {
+        const available = Capacitor.Plugins ? Object.keys(Capacitor.Plugins).join(", ") : "none";
+        throw new Error("Plugin SQLite não encontrado na bridge. Disponíveis: " + available);
+      }
+      sqliteConnection = new SQLiteConnection(plugin);
+    }
+
     db = await sqliteConnection.createConnection(
       "musicapp",
       false,

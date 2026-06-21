@@ -3,6 +3,7 @@
   background: transparent; /* gradiente fica no SongImages ou no playerScreen */
   display: flex;
   flex-direction: column;
+  display: flex;
   gap: 0.75rem;
 }
 

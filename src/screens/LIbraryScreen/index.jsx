@@ -15,6 +15,7 @@ export function LibraryScreen({ setScreen }) {
   } = usePlayerStore();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (library.length === 0) {
@@ -25,7 +26,11 @@ export function LibraryScreen({ setScreen }) {
     }
   }, []);
 
-  const totalSeconds = library.reduce(
+  const filteredLibrary = library.filter((song) =>
+    song.title?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalSeconds = filteredLibrary.reduce(
     (acc, song) => acc + (song.duration || 0),
     0
   );
@@ -60,7 +65,7 @@ export function LibraryScreen({ setScreen }) {
             <div className={styles.statsGrid}>
               <div className={styles.statCard}>
                 <h2>Total de Músicas:</h2>
-                <p>{library.length}</p>
+                <p>{filteredLibrary.length}</p>
               </div>
               <div className={styles.statCard}>
                 <h2>Duração total:</h2>
@@ -68,12 +73,20 @@ export function LibraryScreen({ setScreen }) {
               </div>
             </div>
 
+            <input
+              className={styles.searchInput}
+              type="text"
+              placeholder="Buscar por título..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
             <div className={styles.headerActions}>
               <Button
                 title="Tocar Todas"
                 onClick={() => {
-                  if (library.length === 0) return;
-                  setQueue(library);
+                  if (filteredLibrary.length === 0) return;
+                  setQueue(filteredLibrary);
                   setScreen("player");
                 }}
               />
@@ -82,8 +95,8 @@ export function LibraryScreen({ setScreen }) {
 
           <div className={styles.listContainer}>
             <ul className={styles.songList}>
-              {library.length > 0 ? (
-                library.map((song, index) => (
+              {filteredLibrary.length > 0 ? (
+                filteredLibrary.map((song, index) => (
                   <li key={song.id ?? index} className={styles.songItem}>
                     {/* Card clicável para tocar a música */}
                     <button
@@ -107,7 +120,11 @@ export function LibraryScreen({ setScreen }) {
                 ))
               ) : (
                 <li className={styles.emptyState}>
-                  <h3>Nenhuma música encontrada</h3>
+                  <h3>
+                    {search
+                      ? "Nenhum resultado para sua busca"
+                      : "Nenhuma música encontrada"}
+                  </h3>
                 </li>
               )}
             </ul>

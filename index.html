@@ -25,6 +25,33 @@
 
 <body class="dark">
   <div id="root"></div>
+  <script>
+  (function () {
+    try {
+      var TEMAS = [
+        { accent1: "#2ECC71", accent2: "#27AE60" },
+        { accent1: "#F1C40F", accent2: "#F39C12" },
+        { accent1: "#E74C3C", accent2: "#C0392B" },
+        { accent1: "#3498DB", accent2: "#2980B9" },
+        { accent1: "#9B59B6", accent2: "#8E44AD" },
+        { accent1: "#141414ff", accent2: "#818287ff" },
+        { accent1: "#00E5FF", accent2: "#7B2FF7" },
+        { accent1: "#FF4D6D", accent2: "#00C896" },
+        { accent1: "#FFDFB9", accent2: "#A4193D" },
+        { accent1: "#06D6A0", accent2: "#FFD60A" },
+        { accent1: "#00B4D8", accent2: "#FF5400" },
+        { accent1: "#8AC926", accent2: "#6A00F4" },
+      ];
+      var i = Number(localStorage.getItem("tema-ativo")) || 0;
+      var tema = TEMAS[i] || TEMAS[0];
+      var tag = document.createElement("style");
+      tag.id = "tema-dinamico";
+      tag.textContent =
+        ".dark{--accent1:" + tema.accent1 + " !important;--accent2:" + tema.accent2 + " !important;}";
+      document.head.appendChild(tag);
+    } catch (e) {}
+  })();
+</script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

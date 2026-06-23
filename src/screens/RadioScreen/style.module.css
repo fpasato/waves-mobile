@@ -406,10 +406,10 @@
 /* ================== Player fixo ================== */
 .player {
   position: fixed;
-  bottom: 70px;              
+  bottom: 70px;
   left: 0;
   width: 100%;
-  background: var(--mid);
+  background: var(--background);
   border-top: 1px solid var(--accent2);
   padding: 12px 16px;
   display: flex;
@@ -458,18 +458,21 @@
 }
 
 .playerBtn {
-  background: var(--accent2);
+  background: transparent;
   border: none;
-  color: #000;
+  color: var(--accent1);
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .playerBtn:disabled {

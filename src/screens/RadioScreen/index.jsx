@@ -6,8 +6,8 @@ import { usePlayerStore } from "../../store/playerStore";
 
 import { MdOutlineFavorite } from "react-icons/md";
 import { MdOutlineFavoriteBorder } from "react-icons/md";
-import { LuPause } from "react-icons/lu";
-import { LuPlay } from "react-icons/lu";
+import { CiPause1, CiPlay1 } from "react-icons/ci";
+
 
 
 function WaveIcon() {
@@ -115,14 +115,6 @@ function RadioCard({
       </button>
 
       <div className={styles.cardActions}>
-        <button
-          className={styles.playBtn}
-          onClick={handlePlay}
-          aria-label={isActive ? "Pausar rádio" : "Tocar rádio"}
-          title={isActive ? "Pausar" : "Tocar"}
-        >
-          {isBuffering ? <Spinner /> : isActive ? <LuPause /> : <LuPlay />}
-        </button>
 
         <button
           className={`${styles.favBtn} ${
@@ -227,7 +219,7 @@ function Player({ currentRadio, isPlaying, isBuffering, onPlay, onPause }) {
         disabled={isBuffering}
         aria-label={isPlaying ? "Pausar rádio" : "Tocar rádio"}
       >
-        {isPlaying ? "⏸" : "▶"}
+        {isPlaying ? <CiPause1 /> : <CiPlay1 />}
       </button>
     </div>
   );

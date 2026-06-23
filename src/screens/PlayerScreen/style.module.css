@@ -1,6 +1,7 @@
 .playerArea {
   padding: 0 1.25rem 1.5rem;
-  background: transparent; /* gradiente fica no SongImages ou no playerScreen */
+  background: transparent;
+  /* gradiente fica no SongImages ou no playerScreen */
   display: flex;
   flex-direction: column;
   display: flex;
@@ -37,24 +38,24 @@
   padding: 1rem;
   border-radius: 0.6rem;
 
-  background-color: rgba(0, 0, 0, 0.4); 
-  backdrop-filter: blur(12px); 
-  -webkit-backdrop-filter: blur(12px); 
-  border: 1px solid rgba(255, 255, 255, 0.08); 
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); 
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 
   & .musicDetails {
     flex: 1;
-    min-width: 0; 
+    min-width: 0;
   }
 
   & h3 {
     margin: 0;
     font-size: 1.25rem;
-    color: #ffffff; 
-    white-space: nowrap;     
-    overflow: hidden;      
-    text-overflow: ellipsis; 
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   & p {
@@ -79,7 +80,7 @@
 }
 
 
-.content{
+.content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -97,7 +98,15 @@
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
-  background: var(--background);  
-  gap: 10px;            
-  overflow: hidden;     
+  background: hsla(0, 3%, 7%, 1);
+
+  background: linear-gradient(90deg, hsla(0, 3%, 7%, 1) 0%, hsla(0, 3%, 15%, 1) 100%);
+
+  background: -moz-linear-gradient(90deg, hsla(0, 3%, 7%, 1) 0%, hsla(0, 3%, 15%, 1) 100%);
+
+  background: -webkit-linear-gradient(90deg, hsla(0, 3%, 7%, 1) 0%, hsla(0, 3%, 15%, 1) 100%);
+
+  filter: progid: DXImageTransform.Microsoft.gradient(startColorstr="#131212", endColorstr="#282626", GradientType=1);
+  gap: 10px;
+  overflow: hidden;
 }

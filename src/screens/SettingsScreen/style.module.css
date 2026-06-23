@@ -86,6 +86,8 @@
   align-items: center;
   justify-content: center;
   z-index: 19;
+  border-top: 1px solid var(--shadow);
+
 }
 
 /* ================== Botão Voltar (sem heranças da .tab) ================== */

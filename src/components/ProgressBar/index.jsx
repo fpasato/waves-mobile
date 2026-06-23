@@ -76,7 +76,7 @@ export function ProgressBar() {
     const half = totalBars / 2;
     const maxIndex = 70;
     const smoothedHeights = new Float32Array(totalBars);
-    const smoothing = 0.7;
+    const smoothing = 0.4;
 
     let canvasW = 0;
     let canvasH = 0;
@@ -127,7 +127,7 @@ export function ProgressBar() {
       const { accent1, accent2 } = accentCacheRef.current;
       const barWidth = w / totalBars;
       const actualBarWidth = Math.max(1, barWidth * 0.75);
-      const maxBarHeight = h * 0.75;
+      const maxBarHeight = h * 0.8;
       const currentPercent = displayPercentRef.current;
 
       // Gradiente horizontal entre as duas cores

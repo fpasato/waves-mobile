@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 import { usePlayer } from "../store/PlayerContext";
 import { usePlayerStore } from "../store/playerStore";
-import { updateMusicControlsElapsed } from "./musicControls";
+import {
+  updateMusicControlsElapsed,
+  updateMusicControls,
+} from "./musicControls";
 
 function logWithTime(...args) {
   const now = new Date();
@@ -238,6 +241,7 @@ export function useAudio() {
     crossfadeDoneRef.current = true;
 
     const leaving = getActive();
+    const upcoming = usePlayerStore.getState().peekNextSong(); // a música que já está tocando no entering
     swapActive();
 
     const nowActive = getActive();
@@ -248,6 +252,13 @@ export function useAudio() {
 
     resetElement(leaving, "leaving (completed)");
     enteringAudioRef.current = null;
+
+    // Sincroniza a notificação IMEDIATAMENTE com a música nova,
+    // sem esperar o useEffect do App.jsx reagir à mudança de currentSong
+    if (upcoming) {
+      updateMusicControls(upcoming, true, nowActive.currentTime);
+    }
+
     logWithTime(`🎧 [CROSSFADE] chamando nextSong()`);
     nextSong();
   }

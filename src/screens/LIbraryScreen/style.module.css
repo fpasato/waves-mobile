@@ -286,6 +286,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border-top: 1px solid var(--shadow);
   z-index: 19;
 }
 
@@ -318,4 +319,21 @@
 
 .backButton:active {
   filter: brightness(0.9);
+}
+
+.searchInput {
+  background: var(--background);
+  border: 1px solid var(--shadow);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 0.9rem;
+  outline: none;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.searchInput::placeholder {
+  color: var(--text);
+  opacity: 0.5;
 }

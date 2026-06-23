@@ -152,13 +152,13 @@ export function DirectoriesSettings() {
 
         <div className={styles.actions}>
           <Button
-            title={scanning ? "Escaneando..." : "Escanear dispositivo (v2)"}
+            title={scanning ? "Escaneando..." : "Scan"}
             onClick={handleScanDevice}
             disabled={scanning}
           />
 
           <Button
-            title="🗑️ Limpar banco (temp)"
+            title="Limpar Scan"
             onClick={handleClearSongs}
             className={styles.dangerButton}
           />

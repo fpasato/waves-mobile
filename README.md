@@ -1,4 +1,4 @@
-````md
+
 # 🌊 Waves
 
 Um aplicativo de música desenvolvido como projeto de estudo utilizando **Ionic React** e **Capacitor**. O objetivo é explorar o desenvolvimento de aplicações mobile híbridas, reprodução de áudio local e streaming de rádios online.

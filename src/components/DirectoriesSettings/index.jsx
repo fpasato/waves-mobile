@@ -135,7 +135,7 @@ export function DirectoriesSettings() {
           </div>
 
           <div className={styles.radioGroup}>
-            {[0, 1, 5, 10, 30, 60].map((value) => (
+            {[0, 10, 30, 60].map((value) => (
               <label key={value} className={styles.radioOption}>
                 <input
                   type="radio"
@@ -144,7 +144,7 @@ export function DirectoriesSettings() {
                   checked={minDuration === value}
                   onChange={() => setMinDuration(value)}
                 />
-                <span>{value === 0 ? "Sem filtro" : `${value}s`}</span>
+                <span>{value === 0 ? "0s" : `${value}s`}</span>
               </label>
             ))}
           </div>

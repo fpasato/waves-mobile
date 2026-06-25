@@ -4,7 +4,11 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: var(--background);
+  background: linear-gradient(
+    90deg,
+    #090808,
+    #1b1a1a
+  );
   color: var(--text);
   font-family: 'Segoe UI', sans-serif;
   position: relative;
@@ -214,7 +218,7 @@
   align-items: center;
   gap: 12px;
   transition: background 0.2s;
-  box-shadow: 0 2px 8px var(--shadow);
+  border: 1px solid var(--shadow);
 }
 
 .radioCardActive {

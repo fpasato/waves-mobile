@@ -55,7 +55,8 @@ async function requestAllPermissions() {
 
 function loadLibraryAndSettings(store, cancelledRef) {
   store.reloadLibraryFromDatabase().catch((err) => {
-    if (!cancelledRef.current) console.error("Erro ao carregar biblioteca:", err);
+    if (!cancelledRef.current)
+      console.error("Erro ao carregar biblioteca:", err);
   });
 
   store.loadPlaybackSettings().catch(() => {});
@@ -136,11 +137,17 @@ function PlayerApp() {
           artwork: currentRadio.favicon || "",
         },
         radioPlaying,
-        0
+        0,
       );
     }
-  }, [currentSong, isPlaying, playerType, currentRadio, radioPlaying, duration]);
-
+  }, [
+    currentSong,
+    isPlaying,
+    playerType,
+    currentRadio,
+    radioPlaying,
+    duration,
+  ]);
 
   // Reregistra MusicControls ao retomar o app
   useEffect(() => {
@@ -184,7 +191,10 @@ function PlayerApp() {
   useAudio();
 
   return (
-    <div className={theme}>
+    <div
+      className={theme}
+      style={{ width: "100vw", height: "100dvh", overflow: "hidden" }}
+    >
       {screen === "player" && <PlayerScreen setScreen={setScreen} />}
       {screen === "settings" && <SettingsScreen setScreen={setScreen} />}
       {screen === "library" && <LibraryScreen setScreen={setScreen} />}

@@ -1,84 +1,111 @@
-/* style.module.css — Mobile-first para DirectoriesSettings */
+/* ============================================================
+   DirectoriesSettings – Mobile‑first, moderno e sem sombras
+   ============================================================ */
 
-/* Reset local e base */
 .DirectoriesContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  min-height: 500px;
-
-  padding: 1rem;
+  min-height: 100vh;
+  padding: clamp(0.75rem, 4vw, 2rem);
+  background: transparent;
+  color: var(--text, #f0ece6);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   box-sizing: border-box;
-  background: var(--background, #151515);
-  color: var(--text, #ffffff);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  overflow-y: auto;
 }
 
-/* Card principal */
+/* Card principal – efeito vidro (sem sombras) */
 .card {
   width: 100%;
-  max-width: 480px;
-  background: var(--background);
-  border: 1px solid var(--mid, #373737);
-  border-radius: 1.25rem;
-  padding: 1.5rem 1.25rem;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  max-width: 540px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 2rem;
+  padding: clamp(1.25rem, 5vw, 2.5rem);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  box-sizing: border-box;
+  gap: clamp(1rem, 3vw, 2rem);
+  transition: transform 0.2s ease;
 }
 
 /* Cabeçalho */
 .header h2 {
-  margin: 0 0 0.5rem;
-  font-size: 1.375rem;
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.4rem, 5vw, 2rem);
   font-weight: 700;
-  color: var(--accent1, #FFDFB9);
   letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--accent1, #ffdbb5), var(--accent2, #a4193d));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header p {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  line-height: 1.5;
+  opacity: 0.75;
+  font-weight: 400;
+}
+
+/* Status – animado e com destaque (sem sombra) */
+.status {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 223, 185, 0.06);
+  border-left: 4px solid var(--accent1, #ffdbb5);
+  border-radius: 0.75rem;
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
   line-height: 1.4;
   color: var(--text);
-  opacity: 0.8;
+  opacity: 0.9;
+  word-break: break-word;
+  max-height: 180px;
+  overflow-y: auto;
+  animation: fadeSlide 0.25s ease;
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Seção de configuração de scan */
 .scanSettingsSection {
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--mid);
+  border-radius: 1.25rem;
+  padding: clamp(0.75rem, 2vw, 1.25rem);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
 }
 
 .optionTitle {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  margin-bottom: 1rem;
+  gap: 0.2rem;
+  margin-bottom: 0.75rem;
 }
 
 .optionTitle strong {
-  font-size: 0.9375rem;
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
   font-weight: 600;
   color: var(--text);
+  letter-spacing: -0.01em;
 }
 
 .optionTitle span {
-  font-size: 0.8125rem;
-  opacity: 0.65;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  opacity: 0.6;
   line-height: 1.3;
 }
 
-/* Grupo de radio buttons — touch-friendly */
+/* Grupo de radio buttons – touch‑friendly e com grid */
 .radioGroup {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
   gap: 0.5rem;
   align-items: center;
 }
@@ -86,26 +113,30 @@
 .radioOption {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.55rem 0.9rem;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.2rem;
   border-radius: 2rem;
-  background: var(--mid);
-  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
+  transition: all 0.15s ease;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  font-weight: 500;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  min-height: 44px; /* toque acessível */
 }
 
 .radioOption:active {
-  transform: scale(0.96);
+  transform: scale(0.94);
+  background: rgba(255, 255, 255, 0.08);
 }
 
+/* Estado selecionado – sem sombra, apenas cores */
 .radioOption:has(input:checked) {
-  background: var(--accent2, #A4193D);
-  border-color: var(--accent1);
-  color: var(--text);
+  background: var(--accent2, #a4193d);
+  border-color: var(--accent1, #ffdbb5);
 }
 
 .radioOption input[type="radio"] {
@@ -113,7 +144,7 @@
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
-  border: 2px solid var(--accent1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   background: transparent;
   margin: 0;
   flex-shrink: 0;
@@ -121,11 +152,15 @@
 }
 
 .radioOption input[type="radio"]:checked {
-  background: var(--accent1);
-  box-shadow: 0 0 6px var(--accent1);
+  background: var(--accent1, #ffdbb5);
+  border-color: var(--accent1);
 }
 
-/* Área de ações */
+.radioOption input[type="radio"]:checked + span {
+  color: #fff;
+}
+
+/* Área de ações – botões em coluna no mobile, linha no desktop */
 .actions {
   display: flex;
   flex-direction: column;
@@ -133,84 +168,88 @@
   width: 100%;
 }
 
-/* Botão customizado — estende o componente <Button>, 
-   mas garante estilo responsivo e touch */
-.actions button,
+/* Botões – sem sombras, apenas gradiente e cores sólidas */
 .actions > * {
   width: 100%;
-  min-height: 3.125rem;
-  font-size: 1rem;
+  min-height: 3.25rem;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
   font-weight: 600;
-  border-radius: 2.5rem;
+  border-radius: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background: var(--accent2);
-  color: var(--text);
-  border: 1px solid var(--accent1);
-  transition: all 0.15s ease;
+  padding: 0.6rem 1.25rem;
+  background: var(--accent2, #a4193d);
+  color: #fff;
+  border: none;
+  transition: transform 0.15s ease, filter 0.2s, background 0.2s;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.actions button:active {
-  transform: scale(0.97);
-  opacity: 0.85;
+.actions > *:active {
+  transform: scale(0.96);
+  filter: brightness(1.1);
 }
 
-.actions button:disabled {
-  opacity: 0.45;
+.actions > *:disabled {
+  opacity: 0.4;
   transform: none;
   pointer-events: none;
+  filter: none;
 }
 
-/* Botão de perigo (limpar banco) */
+/* Botão "Limpar Scan" – estilo outline/ghost, sem sombras */
 .dangerButton {
   background: transparent !important;
-  border: 1px solid var(--mid) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   color: var(--text) !important;
-  opacity: 0.8;
 }
 
 .dangerButton:active {
-  background: rgba(164, 25, 61, 0.15) !important;
+  background: rgba(164, 25, 61, 0.1) !important;
   border-color: var(--accent2) !important;
 }
 
-/* Status / mensagem */
-.status {
-  margin-top: 0.25rem;
-  padding: 0.75rem 1rem;
-  background: rgba(255, 223, 185, 0.06);
-  border-left: 3px solid var(--accent1);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  line-height: 1.4;
-  color: var(--text);
-  opacity: 0.9;
-  word-break: break-word;
-  max-height: 200px;
-  overflow-y: auto;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Ajustes para telas muito pequenas (ex: 320px) */
-@media screen and (max-width: 360px) {
+/* ============================================================
+   Ajustes para tablets e desktop
+   ============================================================ */
+@media (min-width: 640px) {
   .card {
-    padding: 1.25rem 1rem;
+    padding: 2rem 2.5rem;
+    border-radius: 2.5rem;
+  }
+
+  .radioGroup {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .actions {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .actions > * {
+    flex: 1;
+    min-height: 3.5rem;
+  }
+}
+
+/* Ajuste fino para telas muito pequenas (< 360px) */
+@media (max-width: 360px) {
+  .card {
+    padding: 1rem;
+    border-radius: 1.5rem;
   }
   .radioGroup {
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.4rem;
   }
   .radioOption {
-    padding: 0.5rem 0.7rem;
-    font-size: 0.8125rem;
+    padding: 0.4rem 0.2rem;
+    font-size: 0.7rem;
+    min-height: 40px;
   }
 }

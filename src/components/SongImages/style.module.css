@@ -1,55 +1,89 @@
-.track {
-  width: 100%;
-  height: 365px;
-  /* 5 × 73px */
+/* ============================================================
+   SongQueueStack – Mobile‑first, moderno, cards maiores
+   com box-shadow em accent1 no card atual
+   ============================================================ */
+
+.stack {
+  --card-width: 92%;
+  --card-max-width: min(450px, 94vw);
+  --card-min-height: clamp(64px, 12vh, 88px); /* AUMENTADO */
+  --card-padding: clamp(0.6rem, 2vw, 1rem) clamp(0.8rem, 3vw, 1.4rem);
+  --card-radius: 1rem;
+  --card-gap: 4px;
+  --title-font-size: clamp(0.9rem, 2.8vw, 1.1rem);
+  --artist-font-size: clamp(0.75rem, 2vw, 0.9rem);
+  --scale-current: 1.08;
+  --scale-neighbor: 0.92;
 }
 
+/* Container principal */
+.stack {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex: 1 1 0;
+  min-height: 160px; /* AUMENTADO para acomodar cards mais altos */
+  overflow: hidden;
+  padding: 0 8px;
+}
+
+.track {
+  width: 100%;
+  height: 100%;
+}
+
+/* Cada slide – mantém 5 visíveis */
 .slideWrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 73px !important;
+  height: calc(100% / 5) !important;
+  padding: 4px 0;
 }
 
+/* Card da música */
 .card {
-  width: 100%;
-  max-width: 350px;
+  width: var(--card-width);
+  max-width: var(--card-max-width);
+  min-height: var(--card-min-height);
+  padding: var(--card-padding);
+  border-radius: var(--card-radius);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 0.6rem 1rem;
-  border-radius: 0.8rem;
-  background-color: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: transform 0.3s ease, opacity 0.3s ease;
-  min-height: 60px;
+  transition: transform 0.3s ease, opacity 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   box-sizing: border-box;
+  will-change: transform, opacity;
 }
 
-/* centralização horizontal — mantido pois é o que funciona */
 .track :global(.swiper-slide) {
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 100%;
 }
 
-/* REMOVIDO o align-items: center do swiper-wrapper */
-
+/* Vizinhos (não ativos) */
 .neighbor {
-  opacity: 0.6;
-  transform: scale(0.9);
+  opacity: 0.5;
+  transform: scale(var(--scale-neighbor));
 }
 
+/* Card ativo – destaque com box-shadow em accent1 */
 .current {
   opacity: 1;
-  transform: scale(1.05);
+  transform: scale(var(--scale-current));
   z-index: 1;
   position: relative;
   border: 2px solid transparent;
   background-clip: padding-box;
-  box-shadow: 0 0 24px var(--accent1);
+  box-shadow: 0 0 20px 4px var(--accent1, #ffdbb5); /* ADICIONADO */
 }
 
 .current::before {
@@ -57,16 +91,21 @@
   position: absolute;
   inset: -2px;
   border-radius: inherit;
-  background: linear-gradient(to right, var(--accent1), var(--accent2));
+  background: linear-gradient(135deg, var(--accent1, #ffdbb5), var(--accent2, #a4193d));
   z-index: -1;
+  opacity: 0.7;
 }
 
+/* Títulos */
 .title {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  font-size: var(--title-font-size);
+  font-weight: 600;
   color: var(--text-primary, #ffffff);
+  line-height: 1.3;
 }
 
 .artist {
@@ -74,42 +113,132 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  font-size: var(--artist-font-size);
   color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  margin-top: 0.15rem;
 }
 
+/* Estado vazio (sem música) – alinhado com os cards */
 .empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  width: 100%;
-  max-width: 350px;
-  height: 365px; /* era 219px */
-  padding: 0.6rem 1rem;
-  border-radius: 0.8rem;
-  background: linear-gradient(to right, #0c0c0c9c, #4141422f);
+  width: var(--card-width);
+  max-width: var(--card-max-width);
+  min-height: var(--card-min-height);
+  padding: var(--card-padding);
+  border-radius: var(--card-radius);
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  margin: 0.6rem auto;
-  transform: scale(1.05);
+  backdrop-filter: blur(4px);
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .emptyIcon {
-  width: 1.6rem;
-  height: 1.6rem;
-  opacity: 0.6;
+  width: clamp(1.6rem, 4vw, 2.2rem);
+  height: clamp(1.6rem, 4vw, 2.2rem);
+  opacity: 0.4;
   color: #fff;
+  margin-bottom: 0.2rem;
 }
 
 .emptyTitle {
-  font-size: 0.9rem;
+  font-size: var(--title-font-size);
   font-weight: 600;
   color: #ffffff;
-  margin-top: 0.5rem;
+  margin-top: 0.2rem;
 }
 
 .emptySubtitle {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-top: 0.25rem;
+  font-size: var(--artist-font-size);
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0.1rem;
+}
+
+/* ============================================================
+   Ajustes para telas muito pequenas (< 360px)
+   ============================================================ */
+@media (max-width: 360px) {
+  .stack {
+    min-height: 120px;
+    padding: 0 4px;
+  }
+  .slideWrapper {
+    padding: 2px 0;
+  }
+  .card,
+  .empty {
+    --card-width: 95%;
+    --card-max-width: 100%;
+    --card-min-height: 48px; /* menor, mas ainda maior que antes */
+    --card-padding: 0.3rem 0.5rem;
+    --card-radius: 0.7rem;
+    --title-font-size: 0.75rem;
+    --artist-font-size: 0.6rem;
+    --scale-current: 1.02;
+    --scale-neighbor: 0.85;
+  }
+  .neighbor {
+    opacity: 0.4;
+  }
+  .current {
+    box-shadow: 0 0 14px 2px var(--accent1, #ffdbb5);
+  }
+}
+
+/* ============================================================
+   Ajustes para tablets (640px – 1024px)
+   ============================================================ */
+@media (min-width: 640px) and (max-width: 1024px) {
+  .stack {
+    min-height: 180px;
+  }
+  .card,
+  .empty {
+    --card-max-width: 460px;
+    --card-min-height: 72px;
+    --card-padding: 0.6rem 1.2rem;
+    --card-radius: 1.1rem;
+    --title-font-size: 1rem;
+    --artist-font-size: 0.85rem;
+    --scale-current: 1.1;
+    --scale-neighbor: 0.9;
+  }
+  .slideWrapper {
+    padding: 5px 0;
+  }
+  .current {
+    box-shadow: 0 0 24px 4px var(--accent1, #ffdbb5);
+  }
+}
+
+/* ============================================================
+   Ajustes para desktops (> 1024px)
+   ============================================================ */
+@media (min-width: 1025px) {
+  .stack {
+    max-width: 620px;
+    margin: 0 auto;
+    min-height: 200px;
+  }
+  .card,
+  .empty {
+    --card-max-width: 500px;
+    --card-min-height: 80px;
+    --card-padding: 0.7rem 1.5rem;
+    --card-radius: 1.2rem;
+    --title-font-size: 1.1rem;
+    --artist-font-size: 0.9rem;
+    --scale-current: 1.12;
+    --scale-neighbor: 0.9;
+  }
+  .slideWrapper {
+    padding: 6px 0;
+  }
+  .current {
+    box-shadow: 0 0 28px 6px var(--accent1, #ffdbb5);
+  }
 }

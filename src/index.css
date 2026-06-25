@@ -14,12 +14,16 @@
 }
 
 .dark {
-  --background: #151515;
+  --background: linear-gradient(
+    90deg,
+    #090808,
+    #1b1a1a
+  );
   --text: #ffffff;
   --mid: linear-gradient(to right, #0c0c0c9c, #4141422f);
   --accent1: #FFDFB9;
   --accent2: #A4193D;
-  --shadow: #4d4b4bcb;
+  --shadow: #2e2c2ccb;
 }
 .tema-repaint * {
   -webkit-text-fill-color: unset;

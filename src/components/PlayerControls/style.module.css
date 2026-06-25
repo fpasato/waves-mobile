@@ -1,14 +1,14 @@
 /* ============================================================
-   PlayerControls – Mobile-first, sem hover, clique tátil
+   PlayerControls – Mobile‑first responsivo
    ============================================================ */
 
-/* Variáveis (use :root se preferir global) */
 .playerControls {
+  /* Tamanhos base com clamp: mínimo, ideal (em vw), máximo */
+  --btn-primary-size: clamp(48px, 15vw, 72px);
+  --btn-secondary-size: clamp(38px, 11vw, 54px);
+  --btn-tertiary-size: clamp(32px, 9vw, 46px);
   --touch-min: 44px;
-  --btn-primary-size: 64px;
-  --btn-secondary-size: 48px;
-  --btn-tertiary-size: 40px;
-  --gap: 10px;
+  --gap: clamp(6px, 2vw, 14px);
   --radius-round: 50%;
   --radius-pill: 24px;
   --transition-tap: 0.1s ease-out;
@@ -18,16 +18,15 @@
   --color-text: #fff;
 }
 
-/* Container */
 .playerControls {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 6px; /* será sobrescrito pelo gap das rows */
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  padding: 10px;
+  padding: clamp(8px, 2.5vw, 18px);
   background: linear-gradient(to right, #0c0c0c9c, #4141422f);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -38,22 +37,26 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Linha auxiliar (repeat, shuffle, record, lyrics) */
-.controlsContainer {
+/* Linhas de controles */
+.controlsContainer,
+.songsButtonContainer {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   width: 100%;
-  gap: 6px;
+  gap: var(--gap);
+}
+
+.controlsContainer {
+  justify-content: space-between;
 }
 
 .controlsRow {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: calc(var(--gap) * 0.6);
 }
 
-/* Botão sem fundo (outline) */
+/* Botões sem fundo (outline) */
 .outButton {
   width: var(--btn-tertiary-size);
   height: var(--btn-tertiary-size);
@@ -69,57 +72,42 @@
 }
 
 .outButton svg {
-  width: 18px;
-  height: 18px;
+  width: clamp(14px, 4vw, 22px);
+  height: clamp(14px, 4vw, 22px);
   transition: transform var(--transition-tap);
 }
 
-/* Clique tátil – apenas active */
 .outButton:active:not(:disabled) {
   transform: scale(0.88);
   border-color: rgba(255, 255, 255, 0.25);
 }
-
 .outButton:active:not(:disabled) svg {
   transform: scale(0.9);
 }
 
-/* Estados de opacidade (remova inline styles) */
-.outButton.inactive {
-  opacity: 0.4;
-}
-.outButton.active {
-  opacity: 1;
-}
+.outButton.inactive { opacity: 0.4; }
+.outButton.active   { opacity: 1; }
 
-/* Gravação ativa – sem animação pesada, só destaque */
 .recordingActive {
   color: #ff3b3b !important;
   border-color: #ff3b3b !important;
 }
-
-/* Legenda ativa */
 .lyricsActive {
   color: var(--color-accent) !important;
   border-color: var(--color-accent) !important;
 }
-
 .lyricsActive svg {
   filter: drop-shadow(0 0 4px var(--color-accent));
 }
 
 /* ============================================================
-   Transportes (play, prev, next, seek)
+   Botões de transporte
    ============================================================ */
 .songsButtonContainer {
-  display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
+  gap: var(--gap);
 }
 
-/* Base */
 .button {
   border: none;
   border-radius: var(--radius-round);
@@ -140,62 +128,57 @@
   transform: none !important;
 }
 
-/* Principal */
 .buttonPrimary {
   width: var(--btn-primary-size);
   height: var(--btn-primary-size);
-  font-size: 1.8rem;
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
   background: transparent;
 }
-
 .buttonPrimary:active:not(:disabled) {
   transform: scale(0.88);
 }
 
-/* Secundários */
 .buttonSecondary {
   width: var(--btn-secondary-size);
   height: var(--btn-secondary-size);
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
 }
-
 .buttonSecondary:active:not(:disabled) {
   transform: scale(0.8);
 }
 
-/* Terciários */
 .buttonTertiary {
   width: var(--btn-tertiary-size);
   height: var(--btn-tertiary-size);
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 3.5vw, 1.4rem);
 }
-
 .buttonTertiary:active:not(:disabled) {
   transform: scale(0.8);
 }
 
 /* ============================================================
-   Offset de legenda
+   Offset de legendas (se presente)
    ============================================================ */
 .offsetControls {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: calc(var(--gap) * 0.6);
   width: 100%;
-  height: 36px;
+  height: clamp(30px, 6vw, 44px);
   padding: 4px 12px;
   background: rgba(255, 255, 255, 0.04);
   border-radius: var(--radius-pill);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 4px;
 }
 
 .offsetButton {
-  width: 28px;
-  height: 28px;
+  width: clamp(24px, 6vw, 34px);
+  height: clamp(24px, 6vw, 34px);
   padding: 0;
-  font-size: 1rem;
+  font-size: clamp(0.8rem, 2.5vw, 1.1rem);
   font-weight: 600;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -208,17 +191,60 @@
   transition: transform var(--transition-tap),
               background var(--transition-tap);
 }
-
 .offsetButton:active:not(:disabled) {
   transform: scale(0.85);
   background: rgba(255, 255, 255, 0.1);
 }
 
 .offsetLabel {
-  font-size: 0.75rem;
+  font-size: clamp(0.65rem, 2vw, 0.85rem);
   font-weight: 500;
   color: var(--color-text);
-  min-width: 45px;
+  min-width: 40px;
   text-align: center;
   letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   Ajustes para telas muito pequenas (ex: < 360px)
+   ============================================================ */
+@media (max-width: 360px) {
+  .playerControls {
+    padding: 6px 8px;
+    border-radius: 20px;
+    gap: 4px;
+  }
+  .controlsRow {
+    gap: 4px;
+  }
+  .songsButtonContainer {
+    gap: 6px;
+  }
+  .offsetControls {
+    height: 28px;
+    padding: 2px 8px;
+  }
+}
+
+/* ============================================================
+   Ajustes para tablets e desktops (> 768px)
+   ============================================================ */
+@media (min-width: 768px) {
+  .playerControls {
+    max-width: 720px;
+    padding: 18px 28px;
+    border-radius: 36px;
+    gap: 10px;
+  }
+  .controlsContainer,
+  .songsButtonContainer {
+    gap: 16px;
+  }
+  .controlsRow {
+    gap: 12px;
+  }
+  .outButton svg {
+    width: 24px;
+    height: 24px;
+  }
 }

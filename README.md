@@ -11,10 +11,8 @@ Um aplicativo de música desenvolvido como projeto de estudo utilizando **Ionic 
 - 📑 Criação e gerenciamento de playlists
 - 🔀 Modos Shuffle e Repeat
 - 🎚️ Crossfade entre músicas
-- 📝 Exibição de letras
 - 🎧 Controles de mídia nativos
 - 🌊 Visualizador de áudio
-- 🌙 Suporte aos temas claro e escuro
 
 ## 🛠️ Tecnologias
 
